@@ -1,0 +1,36 @@
+# url-shortener-umbrella/values.yaml
+mongodb:
+  enabled: true
+  auth:
+    rootUser: mongodb_admin
+    rootPassword: admin_password_123
+    usernames: 
+      - url_shortener_user
+    passwords:
+      - app_password_123
+    databases:
+      - urlshortener
+  persistence:
+    enabled: true
+    size: 8Gi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+url-shortener:
+  replicaCount: 2
+  image:
+    repository: 600627353694.dkr.ecr.ap-south-1.amazonaws.com/itay/short-url
+    tag: "latest"
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+      - host: "url-shortener.local"
+        paths:
+          - path: /
+            pathType: Prefix

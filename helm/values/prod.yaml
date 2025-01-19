@@ -1,0 +1,25 @@
+url-shortener:
+  replicaCount: 3  # More replicas for prod
+  image:
+    tag: "stable"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  ingress:
+    hosts:
+      - host: "url-shortener.example.com"
+
+mongodb:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    size: 10Gi

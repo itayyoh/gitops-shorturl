@@ -1,0 +1,44 @@
+replicaCount: 2
+
+image:
+  repository: 600627353694.dkr.ecr.ap-south-1.amazonaws.com/itay/short-url
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: "url-shortener.local"
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+env:
+  - name: MONGO_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: mongodb-credentials
+        key: username
+  - name: MONGO_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: mongodb-credentials
+        key: password
+  - name: MONGO_DATABASE
+    value: "urlshortener"

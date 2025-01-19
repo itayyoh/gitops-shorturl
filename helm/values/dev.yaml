@@ -1,0 +1,25 @@
+url-shortener:
+  replicaCount: 1  # Fewer replicas for dev
+  image:
+    tag: "latest"
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  ingress:
+    hosts:
+      - host: "dev.url-shortener.local"
+
+mongodb:
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    size: 1Gi

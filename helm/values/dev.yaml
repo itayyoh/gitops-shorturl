@@ -14,6 +14,13 @@ url-shortener:
       - host: "dev.url-shortener.local"
 
 mongodb:
+  enabled: true  # Add this to ensure MongoDB is enabled
+  auth:
+    rootUser: mongodb_admin
+    rootPassword: admin_password_123
+    username: url_shortener_user
+    password: app_password_123
+    database: urlshortener
   resources:
     limits:
       cpu: 300m

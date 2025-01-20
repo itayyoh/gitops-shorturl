@@ -1,0 +1,9 @@
+dependencies:
+- name: mongodb
+  repository: https://charts.bitnami.com/bitnami
+  version: 13.6.0
+- name: url-shortener
+  repository: file://../url-shortener
+  version: 0.1.0
+digest: sha256:60e417d8fa2fcf9a793f9e327f657c4444564f9f0ae1cce69e20113fcfc01b2a
+generated: "2025-01-19T17:05:31.267429311+02:00"

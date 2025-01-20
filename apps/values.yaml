@@ -25,3 +25,6 @@ applications:
     namespace: logging
     path: helm/logging
     syncWave: "1"  # Deploy after url-shortener
+
+  ingressNginx:
+    enabled: true 

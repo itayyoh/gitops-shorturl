@@ -1,5 +1,5 @@
 url-shortener:
-  replicaCount: 1  # Fewer replicas for dev
+  replicaCount: 1
   image:
     tag: "latest"
   resources:
@@ -10,11 +10,18 @@ url-shortener:
       cpu: 100m
       memory: 128Mi
   ingress:
+    enabled: true
+    className: nginx  # This is important
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
       - host: "dev.url-shortener.local"
+        paths:
+          - path: /
+            pathType: Prefix   # Add this line
 
 mongodb:
-  enabled: true  # Add this to ensure MongoDB is enabled
+  enabled: true
   auth:
     rootUser: mongodb_admin
     rootPassword: admin_password_123

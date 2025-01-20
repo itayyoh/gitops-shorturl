@@ -11,3 +11,6 @@ data:
     - type: helm
       url: https://charts.bitnami.com/bitnami
       name: bitnami
+    - type: helm
+      url: https://kubernetes.github.io/ingress-nginx
+      name: ingress-nginx

@@ -1,0 +1,25 @@
+global:
+  repoUrl: https://github.com/your-org/gitops-config.git
+  targetRevision: HEAD
+
+applications:
+  urlshortener:
+    enabled: true
+    name: url-shortener
+    namespace: url-shortener
+    path: helm/url-shortener-umbrella
+    syncWave: "0"  # Deploy first
+
+  monitoring:
+    enabled: false  # Will enable later
+    name: monitoring
+    namespace: monitoring
+    path: helm/monitoring
+    syncWave: "1"  # Deploy after url-shortener
+
+  logging:
+    enabled: false  # Will enable later
+    name: logging
+    namespace: logging
+    path: helm/logging
+    syncWave: "1"  # Deploy after url-shortener

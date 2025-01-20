@@ -1,0 +1,15 @@
+environment: prod
+global:
+  repoUrl: https://github.com/your-org/gitops-config.git
+  targetRevision: HEAD
+
+applications:
+  urlshortener:
+    enabled: true
+    namespace: url-shortener-prod
+
+  monitoring:
+    enabled: false
+
+  logging:
+    enabled: false

@@ -39,3 +39,6 @@ test-output-*.yaml
 # Package directories
 node_modules/
 vendor/
+
+!helm/**/Chart.lock
+!helm/**/charts/

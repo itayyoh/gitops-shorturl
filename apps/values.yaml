@@ -1,7 +1,10 @@
 global:
   repoUrl: https://github.com/itayyoh/gitops-shorturl.git
   targetRevision: HEAD
-environment: dev 
+environment: dev
+
+ingressNginx:
+  enabled: true
 
 applications:
   urlshortener:
@@ -9,7 +12,7 @@ applications:
     name: url-shortener
     namespace: url-shortener
     path: helm/url-shortener-umbrella
-    syncWave: "0"  # Deploy first
+    syncWave: "0"
     valuesFile: helm/values/dev.yaml
 
   monitoring:
@@ -26,5 +29,3 @@ applications:
     path: helm/logging
     syncWave: "1"  # Deploy after url-shortener
 
-  ingressNginx:
-    enabled: true 

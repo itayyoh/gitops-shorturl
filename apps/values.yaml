@@ -1,6 +1,7 @@
 global:
   repoUrl: https://github.com/itayyoh/gitops-shorturl.git
   targetRevision: HEAD
+environment: dev 
 
 applications:
   urlshortener:
@@ -9,6 +10,7 @@ applications:
     namespace: url-shortener
     path: helm/url-shortener-umbrella
     syncWave: "0"  # Deploy first
+    valuesFile: helm/values/dev.yaml
 
   monitoring:
     enabled: false  # Will enable later

@@ -15,7 +15,7 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-        - ../../values/{{ .Values.environment }}.yaml
+        - ../values/dev.yaml  # Updated path to match your structure
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.applications.urlshortener.namespace }}

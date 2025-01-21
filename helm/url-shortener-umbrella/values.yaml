@@ -12,14 +12,17 @@ mongodb:
       - urlshortener
   persistence:
     enabled: true
+    storageClass: "mongodb-gp3"  # Using our custom storage class
     size: 8Gi
+    accessModes:
+      - ReadWriteOnce
   resources:
     limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 250m
+      cpu: 300m
       memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
 
 url-shortener:
   replicaCount: 2

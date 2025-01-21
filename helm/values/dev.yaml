@@ -1,3 +1,24 @@
+# dev.yaml
+mongodb:
+  enabled: true
+  auth:
+    rootUser: mongodb_admin
+    rootPassword: admin_password_123
+    username: url_shortener_user
+    password: app_password_123
+    database: urlshortener
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  persistence:
+    size: 1Gi
+
 url-shortener:
   replicaCount: 1
   image:
@@ -11,29 +32,11 @@ url-shortener:
       memory: 128Mi
   ingress:
     enabled: true
-    className: nginx  # This is important
+    className: nginx
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
       - host: "dev.url-shortener.local"
         paths:
           - path: /
-            pathType: Prefix   # Add this line
-
-mongodb:
-  enabled: true
-  auth:
-    rootUser: mongodb_admin
-    rootPassword: admin_password_123
-    username: url_shortener_user
-    password: app_password_123
-    database: urlshortener
-  resources:
-    limits:
-      cpu: 300m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-  persistence:
-    size: 1Gi
+            pathType: Prefix

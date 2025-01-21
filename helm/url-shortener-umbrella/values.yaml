@@ -1,20 +1,20 @@
+# url-shortener-umbrella/values.yaml
 mongodb:
   enabled: true
   auth:
     rootUser: mongodb_admin
     rootPassword: admin_password_123
-    usernames: 
-      - url_shortener_user
-    passwords:
-      - app_password_123
-    databases:
-      - urlshortener
+    username: url_shortener_user
+    password: app_password_123
+    database: urlshortener
+
   persistence:
     enabled: true
     storageClass: "mongodb-gp3"
     size: 8Gi
     accessModes:
       - ReadWriteOnce
+
   resources:
     limits:
       cpu: 300m

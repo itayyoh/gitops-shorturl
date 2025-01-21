@@ -1,28 +1,26 @@
-{{- if .Values.applications.urlshortener.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.applications.urlshortener.name }}
+  name: url-shortener
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "{{ .Values.applications.urlshortener.syncWave }}"
+    argocd.argoproj.io/sync-wave: "0"  # Deploy first
 spec:
-  project: default
+  project: url-shortener
   source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: {{ .Values.applications.urlshortener.path }}
+    repoURL: git@github.com:itayyoh/gitops-shorturl.git
+    targetRevision: HEAD
+    path: helm/url-shortener-umbrella
     helm:
       valueFiles:
         - values.yaml
-        - ../values/dev.yaml  # Updated path to match your structure
+        - ../values/dev.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.applications.urlshortener.namespace }}
+    namespace: url-shortener
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-{{- end }}

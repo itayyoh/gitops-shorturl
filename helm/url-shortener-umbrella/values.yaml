@@ -1,4 +1,3 @@
-# url-shortener-umbrella/values.yaml
 mongodb:
   enabled: true
   auth:
@@ -12,7 +11,7 @@ mongodb:
       - urlshortener
   persistence:
     enabled: true
-    storageClass: "mongodb-gp3"  # Using our custom storage class
+    storageClass: "mongodb-gp3"
     size: 8Gi
     accessModes:
       - ReadWriteOnce

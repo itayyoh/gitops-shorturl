@@ -18,23 +18,24 @@ mongodb:
 
   resources:
     limits:
-      cpu: 300m
-      memory: 512Mi
+      cpu: 500m
+      memory: 1Gi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 250m
+      memory: 512Mi
 
   ## Add or override these to give Mongo more time to start up
   livenessProbe:
     initialDelaySeconds: 60
-    periodSeconds: 30
     timeoutSeconds: 10
-    failureThreshold: 8
+    periodSeconds: 20
+    failureThreshold: 6
+
   readinessProbe:
-    initialDelaySeconds: 60
-    periodSeconds: 15
+    initialDelaySeconds: 30
     timeoutSeconds: 10
-    failureThreshold: 8
+    periodSeconds: 20
+    failureThreshold: 6
 
 url-shortener:
   replicaCount: 2

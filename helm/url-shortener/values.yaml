@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: 600627353694.dkr.ecr.ap-south-1.amazonaws.com/itay/short-url

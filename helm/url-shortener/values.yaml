@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 600627353694.dkr.ecr.ap-south-1.amazonaws.com/itay/short-url
-  tag: "latest"
+  tag: "v1.0.1"
   pullPolicy: IfNotPresent
 
 service:

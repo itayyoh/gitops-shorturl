@@ -17,7 +17,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
   hosts:
-    - host: afae63a1fe7fc4918aec60773088d0ab-1871420372.ap-south-1.elb.amazonaws.com
+    - host: http://shorturl-app.ddns.net/
       paths:
         - path: /
           pathType: Prefix

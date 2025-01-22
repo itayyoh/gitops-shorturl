@@ -1,5 +1,7 @@
 mongodb:
   enabled: true
+  replicaCount: 1
+  architecture: standalone
   auth:
     rootUser: mongodb_admin
     rootPassword: admin_password_123

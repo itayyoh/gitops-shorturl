@@ -11,7 +11,7 @@ url-shortener:
       memory: 256Mi
   ingress:
     hosts:
-      - host: "url-shortener.example.com"
+      - host: "shorturl-app.ddns.net"
 
 mongodb:
   resources:

@@ -37,7 +37,7 @@ url-shortener:
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
-      - host: "dev.url-shortener.local"
+      - host: "shorturl-app.ddns.net"
         paths:
           - path: /
             pathType: Prefix

@@ -1,5 +1,6 @@
 # dev.yaml
 mongodb:
+  replicaCount: 1
   enabled: true
   auth:
     rootUser: mongodb_admin

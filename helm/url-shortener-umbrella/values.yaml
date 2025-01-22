@@ -52,7 +52,7 @@ url-shortener:
     enabled: true
     className: "nginx"
     hosts:
-      - host: "url-shortener.local"
+      - host: "http://shorturl-app.ddns.net/"
         paths:
           - path: /
             pathType: Prefix

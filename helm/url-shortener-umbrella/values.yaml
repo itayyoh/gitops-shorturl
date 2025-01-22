@@ -9,16 +9,6 @@ mongodb:
     password: app_password_123
     database: urlshortener
 
-  persistence:
-    enabled: true
-    storageClass: "mongodb-gp3"
-    size: 8Gi
-    accessModes:
-      - ReadWriteOnce
-
-mongodb:
-  # ... other configs ...
-  
   resources:
     limits:
       cpu: 1000m

@@ -1,24 +1,14 @@
 # dev.yaml
 mongodb:
-  replicaCount: 1
-  enabled: true
-  auth:
-    rootUser: mongodb_admin
-    rootPassword: admin_password_123
-    username: url_shortener_user
-    password: app_password_123
-    database: urlshortener
-
   resources:
     limits:
-      cpu: 300m
-      memory: 512Mi
+      cpu: "1"
+      memory: "1Gi"
     requests:
-      cpu: 100m
-      memory: 256Mi
-
+      cpu: "500m"
+      memory: "512Mi"
   persistence:
-    size: 1Gi
+    size: 2Gi
 
 url-shortener:
   replicaCount: 1

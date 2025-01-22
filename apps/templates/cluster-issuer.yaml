@@ -3,18 +3,11 @@ kind: Application
 metadata:
   name: cluster-issuer
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"  # Run after cert-manager (-2) and before other apps
 spec:
-  project: default
   source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: manifests/cluster-issuer  # Create this directory and put ClusterIssuer manifest there
+    repoURL: git@github.com:itayyoh/gitops-shorturl.git
+    targetRevision: HEAD
+    path: manifests/cluster-issuer
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true

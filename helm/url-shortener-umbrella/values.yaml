@@ -1,42 +1,19 @@
 mongodb:
-  enabled: true
-  replicaCount: 1
-  architecture: standalone
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+
   auth:
+    enabled: true
     rootUser: mongodb_admin
     rootPassword: admin_password_123
     username: url_shortener_user
     password: app_password_123
     database: urlshortener
-
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-    requests:
-      cpu: 250m      # Reduced from 500m
-      memory: 512Mi  # Keep this minimal for startup
-
-  # Extend timeouts further and add debug logging
-  extraEnvVars:
-    - name: BITNAMI_DEBUG
-      value: "true"
-    - name: MONGODB_EXTRA_FLAGS
-      value: "--setParameter maxTransactionLockRequestTimeoutMillis=5000 --setParameter wiredTigerConcurrentReadTransactions=128 --setParameter wiredTigerConcurrentWriteTransactions=128"
-
-  livenessProbe:
-    enabled: true
-    initialDelaySeconds: 180  # 3 minutes
-    periodSeconds: 30
-    timeoutSeconds: 30
-    failureThreshold: 6
-
-  readinessProbe:
-    enabled: true
-    initialDelaySeconds: 90
-    periodSeconds: 30
-    timeoutSeconds: 30
-    failureThreshold: 6
 
   persistence:
     enabled: true
@@ -44,6 +21,27 @@ mongodb:
     size: 8Gi
     accessModes:
       - ReadWriteOnce
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 90
+    timeoutSeconds: 20
+    periodSeconds: 30
+    failureThreshold: 6
+    
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    timeoutSeconds: 20
+    periodSeconds: 30
+    failureThreshold: 6
+
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 15
+    timeoutSeconds: 20
 
 url-shortener:
   replicaCount: 2

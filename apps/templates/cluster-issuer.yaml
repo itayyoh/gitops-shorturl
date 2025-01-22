@@ -3,7 +3,10 @@ kind: Application
 metadata:
   name: cluster-issuer
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
+  project: default  # Added this line
   source:
     repoURL: git@github.com:itayyoh/gitops-shorturl.git
     targetRevision: HEAD
@@ -11,3 +14,7 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

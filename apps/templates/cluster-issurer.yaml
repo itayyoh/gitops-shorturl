@@ -1,14 +1,20 @@
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: letsencrypt-prod
+  name: cluster-issuer
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  # Run after cert-manager (-2) and before other apps
 spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: itay.yohanok10@gmail.com
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
+  project: default
+  source:
+    repoURL: {{ .Values.global.repoUrl }}
+    targetRevision: {{ .Values.global.targetRevision }}
+    path: manifests/cluster-issuer  # Create this directory and put ClusterIssuer manifest there
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

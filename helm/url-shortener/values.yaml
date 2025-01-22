@@ -16,10 +16,15 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: "url-shortener.local"
+    - host: ""  # Leave empty for catch-all
       paths:
         - path: /
           pathType: Prefix
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
 
 resources:
   limits:

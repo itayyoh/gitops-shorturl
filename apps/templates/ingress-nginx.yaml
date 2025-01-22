@@ -1,11 +1,10 @@
-{{- if .Values.ingressNginx.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: ingress-nginx
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"  # Deploy before other applications
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
@@ -17,6 +16,11 @@ spec:
         controller:
           service:
             type: LoadBalancer
+          ingressClassResource:
+            name: nginx
+            enabled: true
+            default: true
+          watchIngressWithoutClass: true
   destination:
     server: https://kubernetes.default.svc
     namespace: ingress-nginx
@@ -26,4 +30,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-{{- end }}

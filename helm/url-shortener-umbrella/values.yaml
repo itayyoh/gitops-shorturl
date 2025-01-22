@@ -16,38 +16,44 @@ mongodb:
     accessModes:
       - ReadWriteOnce
 
+mongodb:
+  # ... other configs ...
+  
   resources:
     limits:
-      cpu: 1000m  # Increase to 1 core
-      memory: 2Gi # Increase to 2GB for dev environment
+      cpu: 1000m
+      memory: 2Gi
     requests:
-      cpu: 500m   # Increase slightly
-      memory: 1Gi # Increase base memory
+      cpu: 250m      # Reduced from 500m
+      memory: 512Mi  # Keep this minimal for startup
+
+  # Extend timeouts further and add debug logging
+  extraEnvVars:
+    - name: BITNAMI_DEBUG
+      value: "true"
+    - name: MONGODB_EXTRA_FLAGS
+      value: "--setParameter maxTransactionLockRequestTimeoutMillis=5000 --setParameter wiredTigerConcurrentReadTransactions=128 --setParameter wiredTigerConcurrentWriteTransactions=128"
 
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 120
+    initialDelaySeconds: 180  # 3 minutes
     periodSeconds: 30
     timeoutSeconds: 30
-    successThreshold: 1
-    failureThreshold: 3
+    failureThreshold: 6
 
   readinessProbe:
     enabled: true
     initialDelaySeconds: 90
     periodSeconds: 30
     timeoutSeconds: 30
-    successThreshold: 1
-    failureThreshold: 3
+    failureThreshold: 6
 
-  # Add startup probe to give more time for initial startup
-  startupProbe:
+  persistence:
     enabled: true
-    initialDelaySeconds: 100
-    periodSeconds: 30
-    timeoutSeconds: 30
-    successThreshold: 1
-    failureThreshold: 15
+    storageClass: "mongodb-gp3"
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
 
 url-shortener:
   replicaCount: 2

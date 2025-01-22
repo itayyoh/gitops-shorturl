@@ -16,11 +16,12 @@ spec:
         controller:
           service:
             type: LoadBalancer
-          ingressClassResource:
-            name: nginx
-            enabled: true
-            default: true
-          watchIngressWithoutClass: true
+          config:
+            ssl-redirect: false
+            force-ssl-redirect: false
+            use-forwarded-headers: true
+          extraArgs:
+            enable-ssl-passthrough: true
   destination:
     server: https://kubernetes.default.svc
     namespace: ingress-nginx

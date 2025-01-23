@@ -6,7 +6,7 @@ metadata:
   name: monitoring-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"  # Runs first
+    argocd.argoproj.io/sync-wave: "-1"  # Ensures CRDs are applied first
 spec:
   project: default
   source:
@@ -32,7 +32,7 @@ metadata:
   name: {{ .Values.applications.monitoring.name }}
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"  # Runs second
+    argocd.argoproj.io/sync-wave: "0"  # Runs after CRDs
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default
@@ -51,5 +51,5 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true  # Only this application creates the namespace
+      - CreateNamespace=true  # Allows ArgoCD to create the namespace if it doesn't exist
 {{- end }}

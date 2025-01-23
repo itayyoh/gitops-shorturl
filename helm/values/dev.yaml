@@ -9,11 +9,10 @@ mongodb:
       memory: "512Mi"
   persistence:
     size: 2Gi
-
 url-shortener:
   replicaCount: 1
   image:
-    tag: "latest"
+    tag: "v1.0.9"
   resources:
     limits:
       cpu: 300m

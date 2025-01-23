@@ -1,5 +1,5 @@
 apiVersion: v2
 name: root-app
 description: Root application for URL Shortener system
-version: 1.0.1
+version: v1.0.10
 type: application

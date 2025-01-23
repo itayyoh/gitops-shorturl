@@ -1,7 +1,7 @@
 url-shortener:
   replicaCount: 3 # More replicas for prod
   image:
-    tag: "v1.0.9"
+    tag: "v1.0.10"
   resources:
     limits:
       cpu: 500m

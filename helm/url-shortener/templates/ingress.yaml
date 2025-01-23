@@ -7,21 +7,37 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+<<<<<<< Updated upstream
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ .Release.Name }}-url-shortener-tls
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      {{- range .Values.ingress.paths }}
+      - path: {{ .path }}
+        pathType: {{ .pathType }}
+        backend:
+          service:
+            name: {{ $.Release.Name }}-url-shortener
+            port:
+              number: {{ $.Values.service.port }}
+      {{- end }}
+=======
   ingressClassName: nginx
   rules:
-    - host: {{ .Values.ingress.hosts.host | quote }}
+    - host: {{ (index .Values.ingress.hosts 0).host }}  # Fixed this line
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          {{- range (index .Values.ingress.hosts 0).paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ .Release.Name }}-url-shortener
+                name: {{ $.Release.Name }}-url-shortener
                 port:
-                  number: {{ .Values.service.port }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    - hosts:
-        - {{ .Values.ingress.hosts.host | quote }}
-      secretName: {{ .Values.ingress.tls.secretName }}
-  {{- end }}
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+>>>>>>> Stashed changes

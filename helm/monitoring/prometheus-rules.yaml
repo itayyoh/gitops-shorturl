@@ -8,32 +8,99 @@ spec:
   groups:
     - name: url-shortener
       rules:
-        - alert: HighErrorRate
+        # Alert on high error rate
+        - alert: URLShortenerHighErrorRate
           expr: |
-            rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.1
+            rate(flask_http_request_total{status=~"5.."}[5m]) 
+            / 
+            rate(flask_http_request_total[5m]) > 0.1
           for: 5m
           labels:
             severity: critical
+            service: url-shortener
           annotations:
-            summary: High HTTP error rate
-            description: "Error rate is above 10% for the last 5 minutes"
+            summary: High error rate detected
+            description: "{{ $labels.instance }} has a 5xx error rate above 10% for 5m"
 
-        - alert: HighLatency
+        # Alert on high latency
+        - alert: URLShortenerHighLatency
           expr: |
-            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+            histogram_quantile(0.95, 
+              rate(flask_http_request_duration_seconds_bucket[5m])
+            ) > 1
           for: 5m
           labels:
             severity: warning
+            service: url-shortener
           annotations:
-            summary: High latency
-            description: "95th percentile latency is above 1 second"
+            summary: High latency detected
+            description: "95th percentile of request duration is above 1s on {{ $labels.instance }}"
 
-        - alert: MongoDBDown
+        # Alert on MongoDB connection issues
+        - alert: MongoDBConnectionDown
           expr: |
             mongodb_up == 0
           for: 5m
           labels:
             severity: critical
+            service: mongodb
           annotations:
-            summary: MongoDB is down
-            description: "MongoDB instance has been down for more than 5 minutes"
+            summary: MongoDB connection lost
+            description: "MongoDB connection has been down for 5 minutes on {{ $labels.instance }}"
+
+        # Alert on high rate of failed URL creations
+        - alert: URLCreationFailureRate
+          expr: |
+            rate(flask_http_request_total{status=~"4..", path="/shorturl/.+"}[5m])
+            /
+            rate(flask_http_request_total{path="/shorturl/.+"}[5m]) > 0.2
+          for: 5m
+          labels:
+            severity: warning
+            service: url-shortener
+          annotations:
+            summary: High URL creation failure rate
+            description: "URL creation failure rate is above 20% on {{ $labels.instance }}"
+
+        # Alert on unusual spike in URL creation requests
+        - alert: URLCreationSpike
+          expr: |
+            rate(flask_http_request_total{method="POST", path="/shorturl/.+"}[5m]) 
+            > 
+            avg_over_time(flask_http_request_total{method="POST", path="/shorturl/.+"}[24h]) * 3
+          for: 5m
+          labels:
+            severity: warning
+            service: url-shortener
+          annotations:
+            summary: Unusual spike in URL creation requests
+            description: "URL creation rate is 3x higher than 24h average on {{ $labels.instance }}"
+
+    # Recording rules for metrics used in dashboards
+    - name: url-shortener-metrics
+      rules:
+        # Calculate error rates
+        - record: url_shortener:error_rate
+          expr: |
+            sum(rate(flask_http_request_total{status=~"5.."}[5m])) 
+            /
+            sum(rate(flask_http_request_total[5m]))
+
+        # Calculate success rates for URL creation
+        - record: url_shortener:creation_success_rate
+          expr: |
+            sum(rate(flask_http_request_total{status="201", method="POST", path="/shorturl/.+"}[5m]))
+            /
+            sum(rate(flask_http_request_total{method="POST", path="/shorturl/.+"}[5m]))
+
+        # Calculate average request duration
+        - record: url_shortener:request_duration_avg
+          expr: |
+            rate(flask_http_request_duration_seconds_sum[5m])
+            /
+            rate(flask_http_request_duration_seconds_count[5m])
+
+        # Calculate request throughput
+        - record: url_shortener:request_throughput
+          expr: |
+            sum(rate(flask_http_request_total[5m])) by (path)

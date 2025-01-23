@@ -7,7 +7,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: url-shortener
+      app: url-shortener  # Make sure this matches your service labels
   namespaceSelector:
     matchNames:
       - url-shortener
@@ -15,3 +15,4 @@ spec:
     - port: http
       path: /metrics
       interval: 15s
+      scrapeTimeout: 14s  # Added to ensure it's less than interval

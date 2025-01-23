@@ -9,7 +9,7 @@ spec:
   project: url-shortener
   source:
     repoURL: git@github.com:itayyoh/gitops-shorturl.git
-    targetRevision: HEAD
+    targetRevision: MAIN
     path: helm/url-shortener-umbrella
     helm:
       valueFiles:

@@ -1,18 +1,53 @@
-{{- if .Values.applications.monitoring.enabled }}
-# First application for CRDs
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-crds
+  name: kube-prometheus-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"  # Ensures CRDs are applied first
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: helm/monitoring/crds
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: "48.1.1"  # Use an appropriate version
+    chart: kube-prometheus-stack
+    helm:
+      values: |
+        fullnameOverride: prometheus
+        admissionWebhooks:
+          enabled: false
+          patch:
+            enabled: false
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: false
+            patch:
+              enabled: false
+          tls:
+            enabled: false
+        grafana:
+          enabled: true
+        prometheus:
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelector:
+              matchLabels:
+                app.kubernetes.io/instance: kube-prometheus-stack
+            resources:
+              requests:
+                cpu: 500m
+                memory: 500Mi
+              limits:
+                cpu: 1
+                memory: 1Gi
+        crds:
+          enabled: true
+        alertmanager:
+          enabled: true
+        nodeExporter:
+          enabled: true
+        kubeStateMetrics:
+          enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -21,35 +56,7 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
+      - CreateNamespace=true
       - ServerSideApply=true
       - Replace=true
-
----
-# Second application for Prometheus Operator
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: {{ .Values.applications.monitoring.name }}
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"  # Runs after CRDs
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  project: default
-  source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: {{ .Values.applications.monitoring.path }}
-    helm:
-      valueFiles:
-        - values.yaml
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: monitoring
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true  # Allows ArgoCD to create the namespace if it doesn't exist
-{{- end }}
+      - PruneLast=true

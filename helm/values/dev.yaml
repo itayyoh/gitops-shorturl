@@ -12,7 +12,7 @@ mongodb:
 url-shortener:
   replicaCount: 1
   image:
-    tag: "v1.0.14"
+    tag: "v1.0.15"
   resources:
     limits:
       cpu: 300m

@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: "48.1.1"  # Use an appropriate version
+    targetRevision: "48.1.1"
     chart: kube-prometheus-stack
     helm:
       values: |
@@ -46,13 +46,19 @@ spec:
           enabled: true
         nodeExporter:
           enabled: true
+          hostNetwork: false  # Changed to false to avoid port conflicts
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+          tolerations:
+            - operator: "Exists"
           service:
             port: 9100
             targetPort: 9100
-          hostNetwork: false
-          hostPID: true
-          tolerations:
-            - operator: "Exists"
         kubeStateMetrics:
           enabled: true
   destination:

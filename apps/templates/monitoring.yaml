@@ -46,6 +46,13 @@ spec:
           enabled: true
         nodeExporter:
           enabled: true
+          service:
+            port: 9100
+            targetPort: 9100
+          hostNetwork: false
+          hostPID: true
+          tolerations:
+            - operator: "Exists"
         kubeStateMetrics:
           enabled: true
   destination:

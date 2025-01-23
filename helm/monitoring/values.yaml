@@ -4,6 +4,10 @@ kube-prometheus-stack:
     createCustomResource: false
   crds:
     enabled: false
+    create: false
+  kubeRbac:
+    enabled: false
+
 
   prometheus:
     enabled: true

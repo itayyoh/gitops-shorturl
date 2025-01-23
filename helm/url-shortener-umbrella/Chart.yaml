@@ -9,5 +9,5 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
     condition: mongodb.enabled
   - name: url-shortener
-    version: "1.0.1"  # Update this to match url-shortener's version
+    version: "1.0.13"  # Update this to match url-shortener's version
     repository: "file://../url-shortener"

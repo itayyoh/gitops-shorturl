@@ -1,19 +1,20 @@
-# In helm/url-shortener/templates/servicemonitor.yaml
+{{- if .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
     {{- include "url-shortener.labels" . | nindent 4 }}
-    app.kubernetes.io/instance: kube-prometheus-stack
+    release: prometheus
 spec:
   selector:
     matchLabels:
-      {{- include "url-shortener.selectorLabels" . | nindent 6 }}
+      app: url-shortener
   namespaceSelector:
     matchNames:
-      - url-shortener  # Changed from url-shortener-dev to match your actual namespace
+      - {{ .Release.Namespace }}
   endpoints:
     - port: http
       path: /metrics
       interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}

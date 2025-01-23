@@ -1,5 +1,5 @@
 {{- if .Values.applications.monitoring.enabled }}
-# First application for Prometheus Operator CRDs
+# First application for CRDs
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -41,10 +41,8 @@ spec:
     targetRevision: {{ .Values.global.targetRevision }}
     path: {{ .Values.applications.monitoring.path }}
     helm:
-      values: |
-        prometheus-operator:
-          prometheusOperator:
-            createCustomResource: false  # Disable CRD creation from helm chart
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.applications.monitoring.namespace }}

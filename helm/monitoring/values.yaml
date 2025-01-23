@@ -1,4 +1,4 @@
-kubePrometheusStack:
+kube-prometheus-stack:
   prometheusOperator:
     enabled: true
     createCustomResource: false
@@ -14,6 +14,24 @@ kubePrometheusStack:
       podMonitorSelectorNilUsesHelmValues: false
       podMonitorSelector: {}
       podMonitorNamespaceSelector: {}
+
+  alertmanager:
+    enabled: true
+    config:
+      global:
+        resolve_timeout: 5m
+      route:
+        group_by: ['namespace']
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+        receiver: 'null'
+        routes:
+        - match:
+            alertname: Watchdog
+          receiver: 'null'
+      receivers:
+      - name: 'null'
 
   grafana:
     enabled: true
@@ -150,27 +168,3 @@ kubePrometheusStack:
               "version": 0,
               "weekStart": ""
             }
-
-  alertmanager:
-    enabled: true
-    config:
-      global:
-        resolve_timeout: 5m
-      route:
-        group_by: ['namespace']
-        group_wait: 30s
-        group_interval: 5m
-        repeat_interval: 12h
-        receiver: 'null'
-        routes:
-        - match:
-            alertname: Watchdog
-          receiver: 'null'
-      receivers:
-      - name: 'null'
-
-prometheus:
-  serviceMonitorNamespaceSelector: {}
-  serviceMonitorSelector:
-    matchLabels:
-      release: prometheus

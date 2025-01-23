@@ -46,7 +46,9 @@ spec:
           enabled: true
         nodeExporter:
           enabled: true
-          hostNetwork: false  # Changed to false to avoid port conflicts
+          hostNetwork: true
+          nameOverride: "kube-prometheus-stack-node-exporter"
+          fullnameOverride: "kube-prometheus-stack-node-exporter" 
           resources:
             requests:
               cpu: 100m
@@ -57,8 +59,12 @@ spec:
           tolerations:
             - operator: "Exists"
           service:
-            port: 9100
-            targetPort: 9100
+            port: 9101  # Changed from 9100
+            targetPort: 9101  # Changed from 9100
+          ports:
+            - name: metrics
+              containerPort: 9101  # Changed from 9100
+              hostPort: 9101  # Changed from 9100
         kubeStateMetrics:
           enabled: true
   destination:

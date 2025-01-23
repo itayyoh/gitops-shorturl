@@ -3,10 +3,13 @@ kind: Application
 metadata:
   name: monitoring
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: CreateNamespace=true,ServerSideApply=true
 spec:
   project: default
   source:
-    repoURL: git@github.com:itayyoh/gitops-shorturl.git  # Same as url-shortener
+    repoURL: git@github.com:itayyoh/gitops-shorturl.git
     targetRevision: HEAD
     path: helm/monitoring
   destination:
@@ -16,3 +19,7 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      

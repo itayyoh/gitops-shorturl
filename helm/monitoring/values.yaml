@@ -1,6 +1,10 @@
 prometheus-operator:
   prometheusOperator:
     enabled: true
+    createCustomResource: true
+
+  defaultRules:
+    create: true
 
   prometheus:
     enabled: true

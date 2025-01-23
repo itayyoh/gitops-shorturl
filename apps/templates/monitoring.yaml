@@ -6,7 +6,7 @@ metadata:
   name: monitoring-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
@@ -39,7 +39,7 @@ metadata:
   name: {{ .Values.applications.monitoring.name }}
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "0"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default

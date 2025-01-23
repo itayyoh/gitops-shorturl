@@ -1,10 +1,7 @@
-prometheus-operator:
+kubePrometheusStack:
   prometheusOperator:
     enabled: true
-    createCustomResource: true
-
-  defaultRules:
-    create: true
+    createCustomResource: false
 
   prometheus:
     enabled: true

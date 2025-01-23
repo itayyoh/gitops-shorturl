@@ -12,7 +12,7 @@ mongodb:
 url-shortener:
   replicaCount: 1
   image:
-    tag: "v1.0.13"
+    tag: "v1.0.14"
   resources:
     limits:
       cpu: 300m
@@ -30,7 +30,7 @@ url-shortener:
         paths:
           - path: /
             pathType: Prefix
-  serviceMonitor:  # Add this section
+  serviceMonitor: # Add this section
     enabled: true
     interval: 15s
     labels:

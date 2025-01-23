@@ -16,16 +16,16 @@ applications:
     valuesFile: helm/values/dev.yaml
 
   monitoring:
-    enabled: true  # Will enable later
+    enabled: true
     name: monitoring
     namespace: monitoring
     path: helm/monitoring
     syncWave: "1"  # Deploy after url-shortener
+    valuesFile: helm/values/dev.yaml  # Point to dev values or create specific for monitoring if required
 
   logging:
-    enabled: false  # Will enable later
+    enabled: false
     name: logging
     namespace: logging
     path: helm/logging
     syncWave: "1"  # Deploy after url-shortener
-

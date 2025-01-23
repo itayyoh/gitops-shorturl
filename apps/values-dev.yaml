@@ -9,7 +9,15 @@ applications:
     namespace: url-shortener-dev
 
   monitoring:
-    enabled: false
+    enabled: true  # Enable monitoring for development
+    prometheus:
+      resources:
+        requests:
+          cpu: 500m
+          memory: 500Mi
+        limits:
+          cpu: 1
+          memory: 1Gi
 
   logging:
     enabled: false

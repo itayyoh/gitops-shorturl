@@ -9,7 +9,15 @@ applications:
     namespace: url-shortener-prod
 
   monitoring:
-    enabled: false
+    enabled: true  # Decide whether to enable monitoring initially
+    prometheus:
+      resources:
+        requests:
+          cpu: "1"
+          memory: "1Gi"
+        limits:
+          cpu: "2"
+          memory: "2Gi"
 
   logging:
     enabled: false

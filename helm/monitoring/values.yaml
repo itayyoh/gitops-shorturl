@@ -2,6 +2,8 @@ kube-prometheus-stack:
   prometheusOperator:
     enabled: true
     createCustomResource: false
+  crds:
+    enabled: false
 
   prometheus:
     enabled: true

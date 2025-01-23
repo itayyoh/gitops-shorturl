@@ -2,13 +2,20 @@ replicaCount: 2
 
 image:
   repository: 600627353694.dkr.ecr.ap-south-1.amazonaws.com/itay/short-url
-  tag: "v1.0.1"
-  pullPolicy: IfNotPresent
+  tag: "latest"
+  pullPolicy: Always
 
 service:
   type: ClusterIP
   port: 80
   targetPort: 5000
+
+# Add ServiceMonitor configuration
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  labels:
+    app.kubernetes.io/instance: kube-prometheus-stack
 
 ingress:
   enabled: true
@@ -21,11 +28,6 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 5000
 
 resources:
   limits:

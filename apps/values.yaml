@@ -16,7 +16,7 @@ applications:
     valuesFile: helm/values/dev.yaml
 
   monitoring:
-    enabled: false  # Will enable later
+    enabled: true  # Will enable later
     name: monitoring
     namespace: monitoring
     path: helm/monitoring

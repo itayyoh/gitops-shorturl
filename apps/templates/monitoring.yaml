@@ -6,7 +6,7 @@ metadata:
   name: monitoring-crds
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-1"  # Runs first
 spec:
   project: default
   source:
@@ -21,15 +21,8 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
       - ServerSideApply=true
       - Replace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
 
 ---
 # Second application for Prometheus Operator
@@ -39,7 +32,7 @@ metadata:
   name: {{ .Values.applications.monitoring.name }}
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "0"  # Runs second
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default
@@ -50,22 +43,13 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-      parameters:
-        - name: kube-prometheus-stack.prometheusOperator.createCustomResource
-          value: "false"
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.applications.monitoring.namespace }}
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
+      - CreateNamespace=true  # Only this application creates the namespace
 {{- end }}

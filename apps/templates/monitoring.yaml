@@ -46,6 +46,7 @@ spec:
           enabled: true
         nodeExporter:
           enabled: true
+          hostPort: 9101
         kubeStateMetrics:
           enabled: true
   destination:

@@ -9,7 +9,7 @@ applications:
     namespace: url-shortener-dev
 
   monitoring:
-    enabled: true  # Enable monitoring for development
+    enabled: true
     prometheus:
       resources:
         requests:
@@ -18,6 +18,19 @@ applications:
         limits:
           cpu: 1
           memory: 1Gi
+    nodeExporter:  # Add this section
+      enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          cpu: 200m
+          memory: 200Mi
+      hostNetwork: false  # Try disabling host network first
+      service:
+        port: 9100
+        targetPort: 9100
 
   logging:
     enabled: false

@@ -1,7 +1,7 @@
 url-shortener:
-  replicaCount: 3  # More replicas for prod
+  replicaCount: 3 # More replicas for prod
   image:
-    tag: "stable"
+    tag: "v1.0.11"
   resources:
     limits:
       cpu: 500m
@@ -12,7 +12,6 @@ url-shortener:
   ingress:
     hosts:
       - host: "shorturl-app.ddns.net"
-
 mongodb:
   resources:
     limits:

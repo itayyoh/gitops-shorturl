@@ -6,7 +6,7 @@ global:
 applications:
   urlshortener:
     enabled: true
-    namespace: url-shortener-dev
+    namespace: url-shortener
 
   monitoring:
     enabled: true

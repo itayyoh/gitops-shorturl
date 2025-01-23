@@ -1,4 +1,4 @@
-{{- if .Values.serviceMonitor.enabled }}
+# In helm/url-shortener/templates/servicemonitor.yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -12,9 +12,8 @@ spec:
       {{- include "url-shortener.selectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - url-shortener  # Changed from url-shortener-dev to match your actual namespace
   endpoints:
     - port: http
       path: /metrics
       interval: {{ .Values.serviceMonitor.interval }}
-{{- end }}

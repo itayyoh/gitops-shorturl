@@ -1,24 +1,18 @@
-{{- if .Values.applications.monitoring.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.applications.monitoring.name }}
+  name: monitoring
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "{{ .Values.applications.monitoring.syncWave }}"
 spec:
   project: default
   source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: {{ .Values.applications.monitoring.path }}
+    repoURL: git@github.com:itayyoh/gitops-shorturl.git  # Same as url-shortener
+    targetRevision: HEAD
+    path: helm/monitoring
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.applications.monitoring.namespace }}
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-{{- end }}

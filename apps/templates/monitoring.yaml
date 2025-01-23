@@ -35,10 +35,10 @@ spec:
                 app.kubernetes.io/instance: kube-prometheus-stack
             resources:
               requests:
-                cpu: 500m
+                cpu: 300m
                 memory: 500Mi
               limits:
-                cpu: 1
+                cpu: 600m
                 memory: 1Gi
         crds:
           enabled: true

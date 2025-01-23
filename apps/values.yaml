@@ -23,6 +23,7 @@ applications:
     syncWave: "1"  # Deploy after url-shortener
     valuesFile: helm/values/dev.yaml  # Point to dev values or create specific for monitoring if required
 
+
   logging:
     enabled: false
     name: logging

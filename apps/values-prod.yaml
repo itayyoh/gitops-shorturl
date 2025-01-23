@@ -1,6 +1,6 @@
 environment: prod
 global:
-  repoUrl: https://github.com/itayyoh/gitops-shorturl.git
+  repoUrl: git@github.com:itayyoh/gitops-shorturl.git
   targetRevision: HEAD
 
 applications:

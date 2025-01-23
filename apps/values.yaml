@@ -1,5 +1,5 @@
 global:
-  repoUrl: https://github.com/itayyoh/gitops-shorturl.git
+  repoUrl: git@github.com:itayyoh/gitops-shorturl.git
   targetRevision: HEAD
 environment: dev
 

@@ -2,11 +2,21 @@ kube-prometheus-stack:
   prometheusOperator:
     enabled: true
     createCustomResource: false
+    admissionWebhooks:
+      enabled: false      # Disable admission webhooks for now
+      patch:
+        enabled: false
+
   crds:
     enabled: false
     create: false
-  kubeRbac:
-    enabled: false
+
+  commonLabels:
+    release: prometheus
+
+  rbac:
+    create: true
+    pspEnabled: false
 
 
   prometheus:
@@ -15,11 +25,21 @@ kube-prometheus-stack:
       enabled: true
     prometheusSpec:
       serviceMonitorSelectorNilUsesHelmValues: false
-      serviceMonitorSelector: {}
+      serviceMonitorSelector: 
+        matchLabels:
+          release: prometheus  # Add this to match ServiceMonitor
       serviceMonitorNamespaceSelector: {}
       podMonitorSelectorNilUsesHelmValues: false
       podMonitorSelector: {}
       podMonitorNamespaceSelector: {}
+      retention: 10d      # Add retention period
+      resources:          # Add resource limits
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 200m
 
   alertmanager:
     enabled: true

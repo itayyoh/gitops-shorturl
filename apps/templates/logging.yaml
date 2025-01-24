@@ -13,38 +13,22 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Force single instance mode
-        masterService: elasticsearch-master
-        clusterName: elasticsearch
+        # Single node setup
+        clusterName: "elasticsearch"
+        nodeGroup: "master"
         
-        # Explicitly set single node
+        # Force single node
         replicas: 1
         minimumMasterNodes: 1
+        discovery.type: "single-node"
         
-        # Node roles
-        roles:
-          - master
-          - data
-          - ingest
-          
-        # Clustering settings
-        cluster:
-          name: elasticsearch
-          initial_master_nodes: ["elasticsearch-master-0"]
-          
-        # Force single-node discovery
-        discovery.type: single-node
-        network.host: 0.0.0.0
-        
-        # Storage settings
-        volumeClaimTemplate:
-          storageClassName: gp2
-          resources:
-            requests:
-              storage: 10Gi
-        
-        # Important: Set single node cluster
-        singleNode: true
+        # Storage configuration
+        persistence:
+          enabled: true
+          storageClass: "gp2"
+          accessModes:
+          - ReadWriteOnce
+          size: 10Gi
         
         # Resources
         resources:
@@ -54,30 +38,18 @@ spec:
           limits:
             cpu: 1000m
             memory: 1Gi
-            
-        # Additional settings
+        
+        # Disable security
+        antiAffinity: "soft"
         esConfig:
           elasticsearch.yml: |
-            discovery.type: single-node
             xpack.security.enabled: false
-            xpack.monitoring.enabled: true
-            
-        # Important: Disable clustering features
-        enableSystemd: false
-        sysctlInit: false
+            discovery.type: single-node
+            node.store.allow_mmap: false
         
-        # Anti-affinity disabled
-        antiAffinity: "soft"
-        nodeAffinity: {}
-        
-        # Explicitly disable clustering features
-        protocol: http
-        httpPort: 9200
-        transportPort: 9300
-        
-        # Override StatefulSet settings
-        updateStrategy:
-          type: RollingUpdate
+        # Add tolerations
+        tolerations:
+          - operator: "Exists"
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

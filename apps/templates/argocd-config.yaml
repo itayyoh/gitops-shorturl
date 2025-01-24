@@ -14,3 +14,9 @@ data:
     - type: helm
       url: https://kubernetes.github.io/ingress-nginx
       name: ingress-nginx
+    - type: helm
+      url: https://helm.elastic.co
+      name: elastic
+    - type: helm
+      url: https://fluent.github.io/helm-charts
+      name: fluent

@@ -8,207 +8,64 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.elastic.co
+    repoURL: https://kokuwaio.github.io/helm-charts
     targetRevision: "7.17.3"
-    chart: elasticsearch
+    chart: efk
     helm:
       values: |
-        # Single node setup
-        clusterName: "elasticsearch"
-        nodeGroup: "master"
-        
-        # Force single node
-        replicas: 1
-        minimumMasterNodes: 1
-        discovery.type: "single-node"
-        
-        # Storage configuration
-        persistence:
-          enabled: true
+        # Global settings
+        global:
           storageClass: "gp2"
-          accessModes:
-          - ReadWriteOnce
-          size: 10Gi
         
-        # Resources
-        resources:
-          requests:
-            cpu: 200m
-            memory: 512Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
+        # Elasticsearch settings
+        elasticsearch:
+          replicas: 1
+          minimumMasterNodes: 1
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          persistence:
+            enabled: true
+            size: 10Gi
+          esConfig:
+            elasticsearch.yml: |
+              xpack.security.enabled: false
+              discovery.type: single-node
         
-        # Disable security
-        antiAffinity: "soft"
-        esConfig:
-          elasticsearch.yml: |
-            xpack.security.enabled: false
-            discovery.type: single-node
-            node.store.allow_mmap: false
-        
-        # Add tolerations
-        tolerations:
-          - operator: "Exists"
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: logging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: kibana
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  project: default
-  source:
-    repoURL: https://helm.elastic.co
-    targetRevision: "7.17.3"
-    chart: kibana
-    helm:
-      values: |
-        # Connection settings
-        elasticsearchHosts: "http://elasticsearch-master:9200"
-        
-        # Readiness probe configuration
-        readinessProbe:
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
-          
-        # Wait for Elasticsearch
-        extraEnvs:
-          - name: ELASTICSEARCH_HOSTS
-            value: http://elasticsearch-master:9200
-
-        # Kibana configuration
-        kibanaConfig:
-          kibana.yml: |
-            server.name: kibana
-            server.host: "0.0.0.0"
-            elasticsearch.hosts: [ "http://elasticsearch-master:9200" ]
-            elasticsearch.ssl.verificationMode: none
-            elasticsearch.requestTimeout: 90000
-            elasticsearch.pingTimeout: 90000
-            xpack.security.enabled: false
-            xpack.encryptedSavedObjects.encryptionKey: "somethingsomething32characterslong"
-            xpack.security.encryptionKey: "somethingsomething32characterslong"
-            xpack.reporting.encryptionKey: "somethingsomething32characterslong"
-
-        # Resources
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-
-        ingress:
+        # Kibana settings
+        kibana:
           enabled: true
-          annotations:
-            kubernetes.io/ingress.class: nginx
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-          hosts:
-            - host: kibana.yourdomain.com
-              paths:
-                - path: /
-                  pathType: Prefix
-          tls:
-            - secretName: kibana-tls
-              hosts:
-                - kibana.yourdomain.com
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: logging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: fluent-bit
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
-spec:
-  project: default
-  source:
-    repoURL: https://fluent.github.io/helm-charts
-    targetRevision: "0.24.0"
-    chart: fluent-bit
-    helm:
-      values: |
-        # Service Account
-        serviceAccount:
-          create: true
-          annotations: {}
-          
-        # Config
-        config:
-          service: |
-            [SERVICE]
-                Daemon Off
-                Flush 1
-                Log_Level info
-                Parsers_File parsers.conf
-                HTTP_Server On
-                HTTP_Listen 0.0.0.0
-                HTTP_Port 2020
-                
-          inputs: |
-            [INPUT]
-                Name tail
-                Path /var/log/containers/*.log
-                Parser docker
-                Tag kube.*
-                Mem_Buf_Limit 5MB
-                Skip_Long_Lines On
-                
-          filters: |
-            [FILTER]
-                Name kubernetes
-                Match kube.*
-                Merge_Log On
-                Keep_Log Off
-                K8S-Logging.Parser On
-                K8S-Logging.Exclude On
-                
-          outputs: |
-            [OUTPUT]
-                Name es
-                Match kube.*
-                Host elasticsearch-master
-                Port 9200
-                Logstash_Format On
-                Logstash_Prefix kubernetes
-                Replace_Dots On
-                Retry_Limit False
-                
-        # Node tolerations
-        tolerations:
-          - operator: Exists
-            
-        # Resources
-        resources:
-          limits:
-            memory: 128Mi
-            cpu: 100m
-          requests:
-            memory: 64Mi
-            cpu: 50m
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            hosts:
+              - host: kibana.yourdomain.com
+                paths:
+                  - path: /
+        
+        # Fluent-bit settings
+        fluent-bit:
+          enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

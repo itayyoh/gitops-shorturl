@@ -4,6 +4,7 @@ metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
     app.kubernetes.io/instance: kube-prometheus-stack
+    app: url-shortener
     {{- include "url-shortener.labels" . | nindent 4 }}    # Key change here
 spec:
   selector:

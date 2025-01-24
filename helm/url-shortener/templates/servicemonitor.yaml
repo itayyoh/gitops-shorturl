@@ -2,11 +2,8 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
-  namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/instance: kube-prometheus-stack
-    app: url-shortener
-    release: prometheus
+    release: kube-prometheus-stack    # Key change here
 spec:
   selector:
     matchLabels:

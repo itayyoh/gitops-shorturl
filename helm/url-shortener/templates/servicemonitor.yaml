@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    release: kube-prometheus-stack  # Change to this instead
+    app.kubernetes.io/instance: kube-prometheus-stack
     {{- include "url-shortener.labels" . | nindent 4 }}
 spec:
   endpoints:

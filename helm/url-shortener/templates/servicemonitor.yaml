@@ -3,7 +3,8 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    release: kube-prometheus-stack    # Key change here
+    release: kube-prometheus-stack
+    {{- include "url-shortener.labels" . | nindent 4 }}    # Key change here
 spec:
   selector:
     matchLabels:

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: efk-stack
+  name: elasticsearch
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -10,88 +10,20 @@ spec:
   source:
     repoURL: https://helm.elastic.co
     targetRevision: "7.17.3"
-    chart: elastic-stack
+    chart: elasticsearch
     helm:
       values: |
-        elasticsearch:
-          replicas: 3
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
-              cpu: 1000m
-              memory: 2Gi
-          persistence:
-            enabled: true
-            size: 30Gi
-          
-        kibana:
+        replicas: 3
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        persistence:
           enabled: true
-          ingress:
-            enabled: true
-            annotations:
-              kubernetes.io/ingress.class: nginx
-              cert-manager.io/cluster-issuer: letsencrypt-prod
-            hosts:
-              - host: kibana.yourdomain.com
-                paths:
-                  - path: /
-                    pathType: Prefix
-            tls:
-              - secretName: kibana-tls
-                hosts:
-                  - kibana.yourdomain.com
-          resources:
-            requests:
-              cpu: 200m
-              memory: 512Mi
-            limits:
-              cpu: 400m
-              memory: 1Gi
-
-        fluentd:
-          enabled: true
-          daemonset:
-            enabled: true
-          tolerations:
-            - operator: "Exists"
-          resources:
-            limits:
-              cpu: 200m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
-          configMap:
-            # Fluentd config for container logs
-            data:
-              fluent.conf: |
-                <source>
-                  @type tail
-                  path /var/log/containers/*.log
-                  pos_file /var/log/fluentd-containers.log.pos
-                  tag kubernetes.*
-                  read_from_head true
-                  <parse>
-                    @type json
-                    time_key time
-                    time_format %Y-%m-%dT%H:%M:%S.%NZ
-                  </parse>
-                </source>
-
-                <filter kubernetes.**>
-                  @type kubernetes_metadata
-                </filter>
-
-                <match **>
-                  @type elasticsearch
-                  host elasticsearch-master
-                  port 9200
-                  logstash_format true
-                  logstash_prefix k8s-logs
-                </match>
-
+          size: 30Gi
   destination:
     server: https://kubernetes.default.svc
     namespace: logging
@@ -101,6 +33,113 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - Replace=true
-      - PruneLast=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kibana
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: https://helm.elastic.co
+    targetRevision: "7.17.3"
+    chart: kibana
+    helm:
+      values: |
+        elasticsearchHosts: "http://elasticsearch-master:9200"
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+          hosts:
+            - host: kibana.yourdomain.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: kibana-tls
+              hosts:
+                - kibana.yourdomain.com
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 400m
+            memory: 1Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fluentd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  source:
+    repoURL: https://fluent.github.io/helm-charts
+    targetRevision: "0.5.1"
+    chart: fluentd
+    helm:
+      values: |
+        kind: DaemonSet
+        tolerations:
+          - operator: "Exists"
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        configMapConfigs:
+          - fluentd-config
+        fileConfigs:
+          01_sources.conf: |
+            <source>
+              @type tail
+              path /var/log/containers/*.log
+              pos_file /var/log/fluentd-containers.log.pos
+              tag kubernetes.*
+              read_from_head true
+              <parse>
+                @type json
+                time_key time
+                time_format %Y-%m-%dT%H:%M:%S.%NZ
+              </parse>
+            </source>
+          02_filters.conf: |
+            <filter kubernetes.**>
+              @type kubernetes_metadata
+            </filter>
+          03_outputs.conf: |
+            <match **>
+              @type elasticsearch
+              host elasticsearch-master
+              port 9200
+              logstash_format true
+              logstash_prefix k8s-logs
+            </match>
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

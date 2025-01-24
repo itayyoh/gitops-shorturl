@@ -13,32 +13,38 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Single node configuration
-        master: "true"    # Enable master role
-        data: "true"      # Enable data role
-        ingest: "true"    # Enable ingest role
+        # Force single instance mode
+        masterService: elasticsearch-master
+        clusterName: elasticsearch
         
-        # Cluster settings
-        clusterName: "elasticsearch"
-        nodeGroup: "master"
-        masterService: "elasticsearch-master"
-        
-        # Single node setup
+        # Explicitly set single node
         replicas: 1
         minimumMasterNodes: 1
         
-        # Discovery settings
-        discovery:
-          type: single-node
+        # Node roles
+        roles:
+          - master
+          - data
+          - ingest
+          
+        # Clustering settings
+        cluster:
+          name: elasticsearch
+          initial_master_nodes: ["elasticsearch-master-0"]
+          
+        # Force single-node discovery
+        discovery.type: single-node
+        network.host: 0.0.0.0
         
-        # Clear any anti-affinity rules
-        antiAffinity: "soft"
+        # Storage settings
+        volumeClaimTemplate:
+          storageClassName: gp2
+          resources:
+            requests:
+              storage: 10Gi
         
-        # Storage configuration
-        persistence:
-          enabled: true
-          size: 10Gi
-          storageClass: "gp2"
+        # Important: Set single node cluster
+        singleNode: true
         
         # Resources
         resources:
@@ -48,18 +54,30 @@ spec:
           limits:
             cpu: 1000m
             memory: 1Gi
-        
-        # ES configuration
+            
+        # Additional settings
         esConfig:
           elasticsearch.yml: |
-            cluster.initial_master_nodes: []
             discovery.type: single-node
-            node.store.allow_mmap: false
             xpack.security.enabled: false
+            xpack.monitoring.enabled: true
+            
+        # Important: Disable clustering features
+        enableSystemd: false
+        sysctlInit: false
         
-        # Add tolerations
-        tolerations:
-          - operator: "Exists"
+        # Anti-affinity disabled
+        antiAffinity: "soft"
+        nodeAffinity: {}
+        
+        # Explicitly disable clustering features
+        protocol: http
+        httpPort: 9200
+        transportPort: 9300
+        
+        # Override StatefulSet settings
+        updateStrategy:
+          type: RollingUpdate
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

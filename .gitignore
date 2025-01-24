@@ -1,7 +1,4 @@
-# Helm
 
-charts/
-Chart.lock
 
 # Local development
 *.swp

@@ -1,5 +1,5 @@
 # Helm
-*.tgz
+
 charts/
 Chart.lock
 

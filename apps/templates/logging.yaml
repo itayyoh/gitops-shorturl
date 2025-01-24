@@ -13,20 +13,36 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        replicas: 1
-        minimumMasterNodes: 1
+        # Single node setup
         discovery:
           type: single-node
-        resources:
-          requests:
-            cpu: 200m
-            memory: 512Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
+        
+        replicas: 1
+        minimumMasterNodes: 1
+        antiAffinity: "soft"
+
+        # Storage configuration
         persistence:
           enabled: true
-          size: 10Gi
+          size: 5Gi
+          storageClass: "standard"
+
+        # Reduced resource requirements
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+
+        # Security settings
+        esConfig:
+          elasticsearch.yml: |
+            xpack.security.enabled: false
+            xpack.security.transport.ssl.enabled: false
+            xpack.monitoring.enabled: true
+            node.store.allow_mmap: false
   destination:
     server: https://kubernetes.default.svc
     namespace: logging
@@ -52,17 +68,35 @@ spec:
     chart: kibana
     helm:
       values: |
+        # Connection settings
         elasticsearchHosts: "http://elasticsearch-master:9200"
+        
+        # Readiness probe configuration
+        readinessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          
+        # Wait for Elasticsearch
+        extraEnvs:
+          - name: ELASTICSEARCH_HOSTS
+            value: http://elasticsearch-master:9200
+
+        # Kibana configuration
         kibanaConfig:
           kibana.yml: |
             server.name: kibana
             server.host: "0.0.0.0"
             elasticsearch.hosts: [ "http://elasticsearch-master:9200" ]
             elasticsearch.ssl.verificationMode: none
+            elasticsearch.requestTimeout: 90000
+            elasticsearch.pingTimeout: 90000
             xpack.security.enabled: false
             xpack.encryptedSavedObjects.encryptionKey: "somethingsomething32characterslong"
             xpack.security.encryptionKey: "somethingsomething32characterslong"
             xpack.reporting.encryptionKey: "somethingsomething32characterslong"
+
+        # Resources
         resources:
           requests:
             cpu: 100m
@@ -70,6 +104,21 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
+
+        ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+          hosts:
+            - host: kibana.yourdomain.com
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: kibana-tls
+              hosts:
+                - kibana.yourdomain.com
   destination:
     server: https://kubernetes.default.svc
     namespace: logging
@@ -95,9 +144,12 @@ spec:
     chart: fluent-bit
     helm:
       values: |
+        # Service Account
         serviceAccount:
           create: true
-        
+          annotations: {}
+          
+        # Config
         config:
           service: |
             [SERVICE]
@@ -108,6 +160,7 @@ spec:
                 HTTP_Server On
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
+                
           inputs: |
             [INPUT]
                 Name tail
@@ -116,6 +169,7 @@ spec:
                 Tag kube.*
                 Mem_Buf_Limit 5MB
                 Skip_Long_Lines On
+                
           filters: |
             [FILTER]
                 Name kubernetes
@@ -124,6 +178,7 @@ spec:
                 Keep_Log Off
                 K8S-Logging.Parser On
                 K8S-Logging.Exclude On
+                
           outputs: |
             [OUTPUT]
                 Name es
@@ -134,10 +189,12 @@ spec:
                 Logstash_Prefix kubernetes
                 Replace_Dots On
                 Retry_Limit False
-        
+                
+        # Node tolerations
         tolerations:
           - operator: Exists
-        
+            
+        # Resources
         resources:
           limits:
             memory: 128Mi

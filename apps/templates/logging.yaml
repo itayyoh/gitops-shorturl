@@ -13,29 +13,26 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Force single node mode
+        # Single node configuration
+        master: "true"    # Enable master role
+        data: "true"      # Enable data role
+        ingest: "true"    # Enable ingest role
+        
+        # Cluster settings
         clusterName: "elasticsearch"
         nodeGroup: "master"
-        
-        # Ensure single node
         masterService: "elasticsearch-master"
-        roles:
-          - master
-          - data
-          - ingest
         
-        # Explicitly disable clustering
-        discovery:
-          type: "single-node"
-        
-        # Remove replication settings
+        # Single node setup
         replicas: 1
         minimumMasterNodes: 1
         
+        # Discovery settings
+        discovery:
+          type: single-node
+        
         # Clear any anti-affinity rules
         antiAffinity: "soft"
-        podAntiAffinity: {}
-        nodeAffinity: {}
         
         # Storage configuration
         persistence:
@@ -52,7 +49,7 @@ spec:
             cpu: 1000m
             memory: 1Gi
         
-        # Additional settings to ensure single node
+        # ES configuration
         esConfig:
           elasticsearch.yml: |
             cluster.initial_master_nodes: []
@@ -63,15 +60,7 @@ spec:
         # Add tolerations
         tolerations:
           - operator: "Exists"
-        
-        # Explicitly set volume claim template
-        volumeClaimTemplate:
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 10Gi
-          storageClassName: gp2
-  destination:             # Added destination block
+  destination:
     server: https://kubernetes.default.svc
     namespace: logging
   syncPolicy:

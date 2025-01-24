@@ -3,17 +3,16 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    app.kubernetes.io/instance: kube-prometheus-stack
-    app: url-shortener
-    {{- include "url-shortener.labels" . | nindent 4 }}    # Key change here
+    release: kube-prometheus-stack  # Change to this instead
+    {{- include "url-shortener.labels" . | nindent 4 }}
 spec:
-  selector:
-    matchLabels:
-      app: url-shortener
+  endpoints:
+    - interval: 15s
+      path: /metrics
+      port: http
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: {{ .Values.serviceMonitor.interval }}
+  selector:
+    matchLabels:
+      app: url-shortener

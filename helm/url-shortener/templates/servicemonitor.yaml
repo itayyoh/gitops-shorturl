@@ -3,8 +3,9 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    {{- include "url-shortener.labels" . | nindent 4 }}
-    app.kubernetes.io/instance: kube-prometheus-stack  # Change this to match Prometheus selector
+    app.kubernetes.io/instance: kube-prometheus-stack
+    app: url-shortener
+    release: prometheus
 spec:
   selector:
     matchLabels:

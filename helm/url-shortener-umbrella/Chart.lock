@@ -3,7 +3,7 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 13.6.0
 - name: url-shortener
-  repository: file:///home/itay-yohanok/Desktop/gitops/helm/url-shortener
+  repository: file://../url-shortener
   version: 1.0.13
-digest: sha256:f20e9e4ed36a281d21009fe7e2797384be38f19c5e6ddee0f2b5b2ea0af327e2
-generated: "2025-01-24T14:10:56.240081698+02:00"
+digest: sha256:f23d338fdaebfa4d38260a506a2624fc4f85387165fd884e4af8fc61eb92d84d
+generated: "2025-01-24T15:10:02.251830833+02:00"

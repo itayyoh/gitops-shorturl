@@ -3,7 +3,9 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    app.kubernetes.io/instance: kube-prometheus-stack
+    {{- if .Values.serviceMonitor.labels }}
+    {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
+    {{- end }}
     app: url-shortener
     release: prometheus
 spec:

@@ -1,7 +1,7 @@
 apiVersion: v2
 name: url-shortener-umbrella
 description: Umbrella chart for URL shortener application with MongoDB
-version: 1.0.15
+version: 1.0.16
 type: application
 dependencies:
   - name: mongodb
@@ -9,6 +9,6 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
     condition: mongodb.enabled
   - name: url-shortener
-    version: "1.0.15"
+    version: "1.0.16"
     repository: "file://../url-shortener"
 

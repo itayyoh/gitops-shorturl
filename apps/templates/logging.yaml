@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: elasticsearch
+  name: efk-stack
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -28,8 +28,8 @@ spec:
           enabled: true
           size: 10Gi
   destination:
-    server: https://kubernetes.default.svc  # This was missing
-    namespace: logging  # This was missing
+    server: https://kubernetes.default.svc
+    namespace: logging
   syncPolicy:
     automated:
       prune: true
@@ -53,7 +53,6 @@ spec:
     helm:
       values: |
         elasticsearchHosts: "http://elasticsearch-master:9200"
-        
         kibanaConfig:
           kibana.yml: |
             server.name: kibana
@@ -64,7 +63,6 @@ spec:
             xpack.encryptedSavedObjects.encryptionKey: "somethingsomething32characterslong"
             xpack.security.encryptionKey: "somethingsomething32characterslong"
             xpack.reporting.encryptionKey: "somethingsomething32characterslong"
-            
         resources:
           requests:
             cpu: 100m
@@ -72,21 +70,15 @@ spec:
           limits:
             cpu: 500m
             memory: 512Mi
-
-        ingress:
-          enabled: true
-          annotations:
-            kubernetes.io/ingress.class: nginx
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-          hosts:
-            - host: kibana.yourdomain.com
-              paths:
-                - path: /
-                  pathType: Prefix
-          tls:
-            - secretName: kibana-tls
-              hosts:
-                - kibana.yourdomain.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -103,12 +95,9 @@ spec:
     chart: fluent-bit
     helm:
       values: |
-        # Service Account
         serviceAccount:
           create: true
-          annotations: {}
-          
-        # Config
+        
         config:
           service: |
             [SERVICE]
@@ -119,7 +108,6 @@ spec:
                 HTTP_Server On
                 HTTP_Listen 0.0.0.0
                 HTTP_Port 2020
-                
           inputs: |
             [INPUT]
                 Name tail
@@ -128,7 +116,6 @@ spec:
                 Tag kube.*
                 Mem_Buf_Limit 5MB
                 Skip_Long_Lines On
-                
           filters: |
             [FILTER]
                 Name kubernetes
@@ -137,7 +124,6 @@ spec:
                 Keep_Log Off
                 K8S-Logging.Parser On
                 K8S-Logging.Exclude On
-                
           outputs: |
             [OUTPUT]
                 Name es
@@ -148,10 +134,10 @@ spec:
                 Logstash_Prefix kubernetes
                 Replace_Dots On
                 Retry_Limit False
-                
+        
         tolerations:
           - operator: Exists
-            
+        
         resources:
           limits:
             memory: 128Mi
@@ -159,3 +145,12 @@ spec:
           requests:
             memory: 64Mi
             cpu: 50m
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

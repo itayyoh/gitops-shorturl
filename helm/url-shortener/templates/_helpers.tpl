@@ -36,6 +36,7 @@ Common labels
 helm.sh/chart: {{ include "url-shortener.chart" . }}
 {{ include "url-shortener.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app: url-shortener
 {{- end }}
 
 {{/*
@@ -44,4 +45,5 @@ Selector labels
 {{- define "url-shortener.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "url-shortener.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app: url-shortener
 {{- end }}

@@ -1,24 +1,106 @@
-{{- if .Values.applications.logging.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.applications.logging.name }}
+  name: efk-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "{{ .Values.applications.logging.syncWave }}"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
-    repoURL: {{ .Values.global.repoUrl }}
-    targetRevision: {{ .Values.global.targetRevision }}
-    path: {{ .Values.applications.logging.path }}
+    repoURL: https://helm.elastic.co
+    targetRevision: "7.17.3"
+    chart: elastic-stack
+    helm:
+      values: |
+        elasticsearch:
+          replicas: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          persistence:
+            enabled: true
+            size: 30Gi
+          
+        kibana:
+          enabled: true
+          ingress:
+            enabled: true
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            hosts:
+              - host: kibana.yourdomain.com
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - secretName: kibana-tls
+                hosts:
+                  - kibana.yourdomain.com
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 400m
+              memory: 1Gi
+
+        fluentd:
+          enabled: true
+          daemonset:
+            enabled: true
+          tolerations:
+            - operator: "Exists"
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          configMap:
+            # Fluentd config for container logs
+            data:
+              fluent.conf: |
+                <source>
+                  @type tail
+                  path /var/log/containers/*.log
+                  pos_file /var/log/fluentd-containers.log.pos
+                  tag kubernetes.*
+                  read_from_head true
+                  <parse>
+                    @type json
+                    time_key time
+                    time_format %Y-%m-%dT%H:%M:%S.%NZ
+                  </parse>
+                </source>
+
+                <filter kubernetes.**>
+                  @type kubernetes_metadata
+                </filter>
+
+                <match **>
+                  @type elasticsearch
+                  host elasticsearch-master
+                  port 9200
+                  logstash_format true
+                  logstash_prefix k8s-logs
+                </match>
+
   destination:
     server: https://kubernetes.default.svc
-    namespace: {{ .Values.applications.logging.namespace }}
+    namespace: logging
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-{{- end }}
+      - ServerSideApply=true
+      - Replace=true
+      - PruneLast=true

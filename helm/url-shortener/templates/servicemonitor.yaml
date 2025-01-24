@@ -4,13 +4,11 @@ metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
     {{- include "url-shortener.labels" . | nindent 4 }}
-    release: prometheus
+    app.kubernetes.io/instance: kube-prometheus-stack  # Change this to match Prometheus selector
 spec:
   selector:
     matchLabels:
       app: url-shortener
-      app.kubernetes.io/name: {{ include "url-shortener.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}

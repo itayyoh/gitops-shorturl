@@ -71,6 +71,15 @@ spec:
             requests:
               storage: 10Gi
           storageClassName: gp2
+  destination:             # Added destination block
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application

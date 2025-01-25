@@ -13,61 +13,50 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Disable all cluster-wide settings
+        # Basic cluster settings
         clusterName: "elasticsearch"
-        masterService: "elasticsearch-master"
+        nodeGroup: "master"
         
-        # Set single node mode
+        # Single node setup
+        replicas: 1
+        
+        # Explicit single node discovery
         discovery:
           type: single-node
         
-        # Remove cluster bootstrapping
-        masterTerms: false
+        # Node configuration
+        roles: ["master", "data", "ingest"]
         
-        # Configure node roles
-        roles:
-          - master
-          - data
-          - ingest
-        
-        # Basic resources
+        # Resources
         resources:
           requests:
-            cpu: "100m"
+            cpu: "500m"
             memory: "512Mi"
           limits:
             cpu: "1000m"
             memory: "1Gi"
         
-        # Storage config  
+        # Storage
         persistence:
           enabled: true
           storageClass: "gp2"
           size: 10Gi
         
-        # Essential configs
+        # Essential elasticsearch configuration
         esConfig:
           elasticsearch.yml: |
             discovery.type: single-node
             xpack.security.enabled: false
-            node.store.allow_mmap: false
-        
-        # Set explicit protocol
-        protocol: http
-        
-        # Initialize system settings
+            xpack.monitoring.enabled: true
+            
+        # System settings
         sysctlInit:
           enabled: true
         
-        # No anti-affinity needed for single node
-        antiAffinity: "soft"
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: logging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+        extraEnvs:
+          - name: discovery.type
+            value: single-node
+          - name: cluster.initial_master_nodes
+            value: ""
+          - name: bootstrap.memory_lock
+            value: "true"

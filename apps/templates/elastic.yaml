@@ -13,21 +13,14 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Basic cluster settings
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
         # Single node setup
         replicas: 1
-        
-        # Explicit single node discovery
         discovery:
           type: single-node
         
-        # Node configuration
-        roles: ["master", "data", "ingest"]
-        
-        # Resources
         resources:
           requests:
             cpu: "500m"
@@ -36,27 +29,27 @@ spec:
             cpu: "1000m"
             memory: "1Gi"
         
-        # Storage
         persistence:
           enabled: true
           storageClass: "gp2"
           size: 10Gi
         
-        # Essential elasticsearch configuration
+        # Essential configs
         esConfig:
           elasticsearch.yml: |
             discovery.type: single-node
             xpack.security.enabled: false
-            xpack.monitoring.enabled: true
-            
+            node.store.allow_mmap: false
+        
         # System settings
         sysctlInit:
           enabled: true
-        
-        extraEnvs:
-          - name: discovery.type
-            value: single-node
-          - name: cluster.initial_master_nodes
-            value: ""
-          - name: bootstrap.memory_lock
-            value: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

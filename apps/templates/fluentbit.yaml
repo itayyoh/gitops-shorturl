@@ -46,14 +46,14 @@ spec:
                 Logstash_Prefix fluent-bit
                 Replace_Dots On
                 Retry_Limit False
-                
-        tolerations:
-          - operator: "Exists"
-        
-        resources:
-          limits:
-            memory: "200Mi"
-            cpu: "200m"
-          requests:
-            memory: "100Mi"
-            cpu: "100m"
+  # Add destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  # Add syncPolicy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

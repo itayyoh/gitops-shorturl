@@ -14,7 +14,6 @@ spec:
     helm:
       values: |
         elasticsearchHosts: "http://elasticsearch-master:9200"
-        
         resources:
           requests:
             cpu: "250m"
@@ -22,10 +21,20 @@ spec:
           limits:
             cpu: "500m"
             memory: "1Gi"
-            
         kibanaConfig:
           kibana.yml: |
             server.name: kibana
             server.host: "0"
             elasticsearch.hosts: ["http://elasticsearch-master:9200"]
             monitoring.ui.container.elasticsearch.enabled: true
+  # Add destination
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  # Add syncPolicy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

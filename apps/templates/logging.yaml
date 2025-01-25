@@ -13,28 +13,23 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Enforce single node
+        # Single node setup
         replicas: 1
         
-        # StatefulSet configuration
-        updateStrategy:
-          type: RollingUpdate
+        # Node roles correctly defined
+        master: "true"
+        data: "true"
+        ingest: "true"
         
         # Cluster settings
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
-        # Node settings
-        roles:
-        - master
-        - data
-        - ingest
-        
-        # Discovery settings for single node
+        # Discovery settings
         discovery:
           type: single-node
         
-        # Storage settings
+        # Storage configuration
         persistence:
           enabled: true
           storageClass: "gp2"
@@ -54,167 +49,13 @@ spec:
         # ES Config
         esConfig:
           elasticsearch.yml: |
-            discovery.type: single-node
             node.store.allow_mmap: false
             xpack.security.enabled: false
-
-        # Pod management
-        podManagementPolicy: "Parallel"
+            discovery.type: single-node
         
-        # Explicitly disable clustering features
-        minimumMasterNodes: null
-        
-        # Remove anti-affinity for single node
-        antiAffinity: null
-        nodeAffinity: null
-        
-        # Environment variables
-        extraEnvs:
-          - name: discovery.type
-            value: single-node
-          - name: ES_JAVA_OPTS
-            value: "-Xms512m -Xmx512m"
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: logging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: kibana
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-spec:
-  project: default
-  source:
-    repoURL: https://helm.elastic.co
-    targetRevision: "7.17.3"
-    chart: kibana
-    helm:
-      values: |
-        elasticsearchHosts: "http://elasticsearch-master:9200"
-        
-        # Readiness probe
-        readinessProbe:
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
-
-        # Resources
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-
-        # Kibana configuration
-        kibanaConfig:
-          kibana.yml: |
-            server.name: kibana
-            server.host: "0.0.0.0"
-            elasticsearch.hosts: [ "http://elasticsearch-master:9200" ]
-            elasticsearch.ssl.verificationMode: none
-            xpack.security.enabled: false
-
-        # Ingress
-        ingress:
-          enabled: true
-          annotations:
-            kubernetes.io/ingress.class: nginx
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-          hosts:
-            - host: kibana.yourdomain.com
-              paths:
-                - path: /
-                  pathType: Prefix
-          tls:
-            - secretName: kibana-tls
-              hosts:
-                - kibana.yourdomain.com
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: logging
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: fluent-bit
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
-spec:
-  project: default
-  source:
-    repoURL: https://fluent.github.io/helm-charts
-    targetRevision: "0.24.0"
-    chart: fluent-bit
-    helm:
-      values: |
-        config:
-          service: |
-            [SERVICE]
-                Daemon Off
-                Flush 1
-                Log_Level info
-                Parsers_File parsers.conf
-                
-          inputs: |
-            [INPUT]
-                Name tail
-                Path /var/log/containers/*.log
-                Parser docker
-                Tag kube.*
-                Mem_Buf_Limit 5MB
-                Skip_Long_Lines On
-                
-          filters: |
-            [FILTER]
-                Name kubernetes
-                Match kube.*
-                Merge_Log On
-                Keep_Log Off
-                K8S-Logging.Parser On
-                K8S-Logging.Exclude On
-                
-          outputs: |
-            [OUTPUT]
-                Name es
-                Match kube.*
-                Host elasticsearch-master
-                Port 9200
-                Logstash_Format On
-                Logstash_Prefix kubernetes
-                Replace_Dots On
-                Retry_Limit False
-                Buffer_Size 1M
-        
-        # Tolerations
+        # Add tolerations
         tolerations:
           - operator: "Exists"
-            
-        # Resources
-        resources:
-          limits:
-            memory: 128Mi
-            cpu: 100m
-          requests:
-            memory: 64Mi
-            cpu: 50m
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

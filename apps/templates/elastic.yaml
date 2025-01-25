@@ -13,37 +13,55 @@ spec:
     chart: elasticsearch
     helm:
       values: |
+        # Simplified single-node configuration
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
-        # Single node setup
-        replicas: 1
-        discovery:
-          type: single-node
+        # Explicit memory settings
+        esJavaOpts: "-Xmx512m -Xms512m"
         
+        # Single node settings
+        masterService: elasticsearch-master
+        replicas: 1
+        minimumMasterNodes: 1
+        
+        # Basic resources
         resources:
           requests:
             cpu: "500m"
-            memory: "512Mi"
+            memory: "1Gi"
           limits:
             cpu: "1000m"
             memory: "1Gi"
         
+        # Storage
         persistence:
           enabled: true
           storageClass: "gp2"
           size: 10Gi
         
-        # Essential configs
+        # Simple configuration
         esConfig:
           elasticsearch.yml: |
             discovery.type: single-node
             xpack.security.enabled: false
-            node.store.allow_mmap: false
+            xpack.security.transport.ssl.enabled: false
+            
+        # Disable anti-affinity for single node
+        antiAffinity: "soft"
         
         # System settings
         sysctlInit:
           enabled: true
+        
+        # Network settings
+        protocol: http
+        httpPort: 9200
+        transportPort: 9300
+        
+        # Security
+        createCert: false
+        
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

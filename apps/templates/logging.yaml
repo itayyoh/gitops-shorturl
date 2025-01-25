@@ -13,14 +13,28 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Single node setup
+        # Enforce single node
+        replicas: 1
+        
+        # StatefulSet configuration
+        updateStrategy:
+          type: RollingUpdate
+        
+        # Cluster settings
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
-        # Force single node mode
-        masterService: "elasticsearch-master"
+        # Node settings
+        roles:
+        - master
+        - data
+        - ingest
         
-        # Storage configuration
+        # Discovery settings for single node
+        discovery:
+          type: single-node
+        
+        # Storage settings
         persistence:
           enabled: true
           storageClass: "gp2"
@@ -37,26 +51,27 @@ spec:
             cpu: 1000m
             memory: 1Gi
         
-        # ES configuration
+        # ES Config
         esConfig:
           elasticsearch.yml: |
+            discovery.type: single-node
             node.store.allow_mmap: false
             xpack.security.enabled: false
-            discovery.type: single-node
-            
-        # Add tolerations
-        tolerations:
-          - operator: "Exists"
+
+        # Pod management
+        podManagementPolicy: "Parallel"
         
-        # Anti-affinity settings
-        antiAffinity: "soft"
+        # Explicitly disable clustering features
+        minimumMasterNodes: null
+        
+        # Remove anti-affinity for single node
+        antiAffinity: null
+        nodeAffinity: null
         
         # Environment variables
         extraEnvs:
           - name: discovery.type
             value: single-node
-          - name: xpack.security.enabled
-            value: "false"
           - name: ES_JAVA_OPTS
             value: "-Xms512m -Xmx512m"
   destination:

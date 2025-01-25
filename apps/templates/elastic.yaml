@@ -13,47 +13,55 @@ spec:
     chart: elasticsearch
     helm:
       values: |
+        # Disable all cluster-wide settings
         clusterName: "elasticsearch"
-        nodeGroup: "master"
+        masterService: "elasticsearch-master"
         
-        # Single node setup
-        replicas: 1
-        minimumMasterNodes: 1
-        
-        # Discovery settings
+        # Set single node mode
         discovery:
           type: single-node
         
-        # Remove cluster.initial_master_nodes setting
-        # Add explicit bootstrap settings
-        esConfig:
-          elasticsearch.yml: |
-            node.store.allow_mmap: false
-            xpack.security.enabled: false
-            discovery.type: single-node
-            # Remove any cluster.initial_master_nodes configuration
+        # Remove cluster bootstrapping
+        masterTerms: false
         
-        # Storage configuration
+        # Configure node roles
+        roles:
+          - master
+          - data
+          - ingest
+        
+        # Basic resources
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        
+        # Storage config  
         persistence:
           enabled: true
           storageClass: "gp2"
           size: 10Gi
         
-        # Resources
-        resources:
-          requests:
-            cpu: 150m
-            memory: 256Mi
-          limits:
-            cpu: 300m
-            memory: 512Mi
-
-        # System settings
+        # Essential configs
+        esConfig:
+          elasticsearch.yml: |
+            discovery.type: single-node
+            xpack.security.enabled: false
+            node.store.allow_mmap: false
+        
+        # Set explicit protocol
+        protocol: http
+        
+        # Initialize system settings
         sysctlInit:
           enabled: true
-          
-        # Anti-affinity settings can be disabled for single node
+        
+        # No anti-affinity needed for single node
         antiAffinity: "soft"
+
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

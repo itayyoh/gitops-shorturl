@@ -1,0 +1,65 @@
+# templates/fluentbit.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fluent-bit
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"  # Deploy last
+spec:
+  project: default
+  source:
+    repoURL: https://fluent.github.io/helm-charts
+    targetRevision: "0.24.0"
+    chart: fluent-bit
+    helm:
+      values: |
+        config:
+          service: |
+            [SERVICE]
+                Daemon Off
+                Flush 1
+                Log_Level info
+                Parsers_File parsers.conf
+          inputs: |
+            [INPUT]
+                Name tail
+                Path /var/log/containers/*.log
+                Parser docker
+                Tag kube.*
+                Mem_Buf_Limit 5MB
+                Skip_Long_Lines On
+          filters: |
+            [FILTER]
+                Name kubernetes
+                Match kube.*
+                Merge_Log On
+                Keep_Log Off
+          outputs: |
+            [OUTPUT]
+                Name es
+                Match kube.*
+                Host elasticsearch-master
+                Port 9200
+                Logstash_Format On
+                Replace_Dots On
+        
+        tolerations:
+          - operator: "Exists"
+        
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 100m
+          requests:
+            memory: 64Mi
+            cpu: 50m
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

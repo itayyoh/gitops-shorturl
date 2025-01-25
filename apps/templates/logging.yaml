@@ -17,11 +17,10 @@ spec:
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
-        # Force single node
-        replicas: 1
-        minimumMasterNodes: 1
+        # Force single node mode
+        masterService: "elasticsearch-master"
         
-        # Node configurations
+        # Single node configuration
         discovery:
           type: single-node
         
@@ -42,16 +41,31 @@ spec:
             cpu: 1000m
             memory: 1Gi
         
-        # Additional settings
+        # ES configuration
         esConfig:
           elasticsearch.yml: |
             node.store.allow_mmap: false
             xpack.security.enabled: false
             discovery.type: single-node
-        
-        # Add tolerations for AWS
+            cluster.initial_master_nodes: null  # explicitly set to null
+            
+        # Add tolerations
         tolerations:
           - operator: "Exists"
+        
+        # Anti-affinity settings
+        antiAffinity: "soft"
+        
+        # Environment variables
+        extraEnvs:
+          - name: discovery.type
+            value: single-node
+          - name: cluster.initial_master_nodes
+            value: ""
+          - name: xpack.security.enabled
+            value: "false"
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

@@ -13,12 +13,22 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Basic settings
         clusterName: "elasticsearch"
         nodeGroup: "master"
         
         # Single node setup
         replicas: 1
+        minimumMasterNodes: 1
+        
+        # Discovery settings
+        discovery:
+          type: single-node
+        
+        # Storage
+        persistence:
+          enabled: true
+          storageClass: "gp2"
+          size: 10Gi
         
         # Resources
         resources:
@@ -29,18 +39,12 @@ spec:
             cpu: 300m
             memory: 512Mi
 
-        # Storage
-        persistence:
-          enabled: true
-          storageClass: "gp2"
-          size: 10Gi
-
         # ES Config
         esConfig:
           elasticsearch.yml: |
             node.store.allow_mmap: false
-            discovery.type: single-node
             xpack.security.enabled: false
+            discovery.type: single-node
 
         # Environment
         extraEnvs:
@@ -48,10 +52,6 @@ spec:
             value: single-node
           - name: ES_JAVA_OPTS
             value: "-Xms256m -Xmx256m"
-
-        # AWS compatibility
-        tolerations:
-          - operator: "Exists"
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

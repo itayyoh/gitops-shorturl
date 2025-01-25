@@ -25,8 +25,7 @@ applications:
 
 
   logging:
-    enabled: false
+    enabled: true
     name: logging
     namespace: logging
-    path: helm/logging
     syncWave: "1"  # Deploy after url-shortener

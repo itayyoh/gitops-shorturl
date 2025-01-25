@@ -33,4 +33,4 @@ applications:
         targetPort: 9100
 
   logging:
-    enabled: false
+    enabled: true

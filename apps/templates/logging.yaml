@@ -20,10 +20,6 @@ spec:
         # Force single node mode
         masterService: "elasticsearch-master"
         
-        # Single node configuration
-        discovery:
-          type: single-node
-        
         # Storage configuration
         persistence:
           enabled: true
@@ -47,7 +43,6 @@ spec:
             node.store.allow_mmap: false
             xpack.security.enabled: false
             discovery.type: single-node
-            cluster.initial_master_nodes: null  # explicitly set to null
             
         # Add tolerations
         tolerations:
@@ -60,8 +55,6 @@ spec:
         extraEnvs:
           - name: discovery.type
             value: single-node
-          - name: cluster.initial_master_nodes
-            value: ""
           - name: xpack.security.enabled
             value: "false"
           - name: ES_JAVA_OPTS

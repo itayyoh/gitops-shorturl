@@ -8,44 +8,39 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://kokuwaio.github.io/helm-charts
-    targetRevision: "0.1.4"  # This is the correct version
+    repoURL: https://cryptexlabs.github.io/helm-charts
+    targetRevision: "7.17.3"  # Updated version
     chart: efk
     helm:
       values: |
-        # Global settings
-        global:
-          storageClass: "gp2"
-        
-        # Elasticsearch settings
         elasticsearch:
           replicas: 1
-          minimumMasterNodes: 1
           resources:
             requests:
-              cpu: 200m
-              memory: 512Mi
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              memory: "1Gi"
+              cpu: "500m"
           persistence:
             enabled: true
+            storageClass: "gp2"
             size: 10Gi
-          esConfig:
-            elasticsearch.yml: |
-              xpack.security.enabled: false
-              discovery.type: single-node
-        
-        # Kibana settings
+          esJavaOpts: "-Xmx512m -Xms512m"
+          extraEnvs:
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+
         kibana:
-          enabled: true
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
+              cpu: "100m"
+              memory: "256Mi"
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: "300m"
+              memory: "512Mi"
           ingress:
             enabled: true
             annotations:
@@ -55,17 +50,24 @@ spec:
               - host: kibana.yourdomain.com
                 paths:
                   - path: /
-        
-        # Fluent-bit settings
-        fluent-bit:
+                    pathType: Prefix
+            tls:
+              - secretName: kibana-tls
+                hosts:
+                  - kibana.yourdomain.com
+
+        fluentd:
           enabled: true
           resources:
             requests:
-              cpu: 50m
-              memory: 64Mi
+              cpu: "100m"
+              memory: "200Mi"
             limits:
-              cpu: 100m
-              memory: 128Mi
+              cpu: "200m"
+              memory: "400Mi"
+          tolerations:
+            - operator: "Exists"
+
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

@@ -2,69 +2,26 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: elasticsearch
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
-  project: default
+  destination:
+    namespace: argocd
   source:
-    repoURL: https://helm.elastic.co
-    targetRevision: "7.17.3"
+    repoURL: 'https://helm.elastic.co'
+    targetRevision: 7.17.3
     chart: elasticsearch
     helm:
       values: |
-        # Simplified single-node configuration
-        clusterName: "elasticsearch"
-        nodeGroup: "master"
-        
-        # Explicit memory settings
-        esJavaOpts: "-Xmx512m -Xms512m"
-        
-        # Single node settings
-        masterService: elasticsearch-master
-        replicas: 1
-        minimumMasterNodes: 1
-        
-        # Basic resources
         resources:
           requests:
-            cpu: "500m"
-            memory: "1Gi"
-          limits:
-            cpu: "1000m"
-            memory: "1Gi"
-        
-        # Storage
-        persistence:
-          enabled: true
-          storageClass: "gp2"
-          size: 10Gi
-        
-        # Simple configuration
-        esConfig:
-          elasticsearch.yml: |
-            discovery.type: single-node
-            xpack.security.enabled: false
-            xpack.security.transport.ssl.enabled: false
-            
-        # Disable anti-affinity for single node
-        antiAffinity: "soft"
-        
-        # System settings
-        sysctlInit:
-          enabled: true
-        
-        # Network settings
-        protocol: http
-        httpPort: 9200
-        transportPort: 9300
-        
-        # Security
-        createCert: false
-        
+            cpu: "150m"
+            memory: "256Mi"
+        master:
+            masterOnly: false
+            replicaCount: 1
   destination:
-    server: https://kubernetes.default.svc
     namespace: logging
+    server: 'https://kubernetes.default.svc'
+  project: default
   syncPolicy:
     automated:
       prune: true

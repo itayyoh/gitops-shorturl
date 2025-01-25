@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: efk-stack-unified
+  name: efk-stack
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://kokuwaio.github.io/helm-charts
-    targetRevision: "7.17.3"
+    targetRevision: "0.1.4"  # This is the correct version
     chart: efk
     helm:
       values: |

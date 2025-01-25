@@ -1,11 +1,10 @@
-# templates/elastic.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: elasticsearch
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"  # Deploy first
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
@@ -25,7 +24,16 @@ spec:
         discovery:
           type: single-node
         
-        # Storage
+        # Remove cluster.initial_master_nodes setting
+        # Add explicit bootstrap settings
+        esConfig:
+          elasticsearch.yml: |
+            node.store.allow_mmap: false
+            xpack.security.enabled: false
+            discovery.type: single-node
+            # Remove any cluster.initial_master_nodes configuration
+        
+        # Storage configuration
         persistence:
           enabled: true
           storageClass: "gp2"
@@ -40,12 +48,12 @@ spec:
             cpu: 300m
             memory: 512Mi
 
-        # ES Config
-        esConfig:
-          elasticsearch.yml: |
-            node.store.allow_mmap: false
-            xpack.security.enabled: false
-            discovery.type: single-node
+        # System settings
+        sysctlInit:
+          enabled: true
+          
+        # Anti-affinity settings can be disabled for single node
+        antiAffinity: "soft"
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

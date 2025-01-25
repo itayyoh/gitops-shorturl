@@ -13,28 +13,21 @@ spec:
     chart: elasticsearch
     helm:
       values: |
-        # Single node setup
+        # Force single node setup
         replicas: 1
         
-        # Node roles correctly defined
-        master: "true"
-        data: "true"
-        ingest: "true"
-        
-        # Cluster settings
-        clusterName: "elasticsearch"
-        nodeGroup: "master"
-        
-        # Discovery settings
+        # Single node discovery
         discovery:
           type: single-node
         
-        # Storage configuration
+        # Node configuration
+        masterService: elasticsearch-master
+        clusterName: elasticsearch
+        
+        # Storage
         persistence:
           enabled: true
           storageClass: "gp2"
-          accessModes:
-          - ReadWriteOnce
           size: 10Gi
         
         # Resources
@@ -46,16 +39,44 @@ spec:
             cpu: 1000m
             memory: 1Gi
         
-        # ES Config
+        # Important: Configure readiness probe
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        
+        # ES Config settings
         esConfig:
           elasticsearch.yml: |
             node.store.allow_mmap: false
             xpack.security.enabled: false
             discovery.type: single-node
+            cluster.initial_master_nodes: null
+            cluster.routing.allocation.disk.threshold_enabled: false
+            # Health check should be yellow for single node
+            cluster.routing.allocation.disk.watermark.low: 93%
+            cluster.routing.allocation.disk.watermark.high: 95%
         
-        # Add tolerations
+        # Add AWS tolerations
         tolerations:
           - operator: "Exists"
+        
+        # Environment variables
+        extraEnvs:
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"
+          - name: discovery.type
+            value: single-node
+          # Expected cluster state for single node
+          - name: EXPECTED_NODES
+            value: "1"
+          - name: MINIMUM_MASTER_NODES
+            value: "1"
+          # Reduce wait times
+          - name: ACCEPT_DEFAULTS
+            value: "true"
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

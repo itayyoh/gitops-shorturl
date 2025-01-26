@@ -132,7 +132,7 @@ spec:
                        "type": "timeseries",
                        "targets": [
                          {
-                           "expr": "rate(shorturl_create_total[5m])",
+                           "expr": "sum by (status) (flask_http_request_total)",
                            "legendFormat": "HTTP {{status}}"
                          },
                          {

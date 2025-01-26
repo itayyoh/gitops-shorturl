@@ -23,7 +23,7 @@ spec:
               cert-manager.io/cluster-issuer: letsencrypt-prod
               nginx.ingress.kubernetes.io/ssl-redirect: "true"
             hosts:
-              - grafana.yourdomain.com
+              - grafana.ddns.net
             tls:
               - secretName: grafana-tls
                 hosts:

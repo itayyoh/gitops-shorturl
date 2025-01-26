@@ -1,364 +1,365 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
- name: kube-prometheus-stack
- namespace: argocd
- annotations:
-   argocd.argoproj.io/sync-wave: "1"
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
- project: default
- source:
-   repoURL: https://prometheus-community.github.io/helm-charts
-   targetRevision: "48.1.1"
-   chart: kube-prometheus-stack
-   helm:
-     values: |
-       prometheusOperator:
-         createCustomResource: true
-         admissionWebhooks:
-           enabled: false
-           patch:
-             enabled: false
-         tls:
-           enabled: false
-       crds:
-         enabled: true
-         create: true
-       fullnameOverride: prometheus
-       
-       grafana:
-         enabled: true
-         ingress:
-           enabled: true
-           ingressClassName: nginx
-           annotations:
-             cert-manager.io/cluster-issuer: letsencrypt-prod
-             nginx.ingress.kubernetes.io/ssl-redirect: "true"
-           hosts:
-             - grafana.ddns.net
-           tls:
-             - secretName: grafana-tls
-               hosts:
-                 - grafana.ddns.net
-         sidecar:
-           dashboards:
-             enabled: true
-             searchNamespace: ALL
-           datasources:
-             enabled: true
-             defaultDatasourceEnabled: true
-         dashboardProviders:
-           dashboardproviders.yaml:
-             apiVersion: 1
-             providers:
-             - name: 'default'
-               orgId: 1
-               folder: ''
-               type: file
-               disableDeletion: false
-               editable: true
-               options:
-                 path: /var/lib/grafana/dashboards
-         datasources:
-           datasources.yaml:
-             apiVersion: 1
-             deleteAll: true
-             datasources:
-               - name: Prometheus
-                 type: prometheus
-                 url: http://prometheus-prometheus:9090
-                 access: proxy
-                 isDefault: true
-                 jsonData:
-                   timeInterval: "5s"
-                   queryTimeout: "30s"
-                   scrapeInterval: 5s
-dashboards:
-          default:
-            url-shortener:
-              json: |
-                {
-                  "annotations": {
-                    "list": []
-                  },
-                  "editable": true,
-                  "fiscalYearStartMonth": 0,
-                  "graphTooltip": 0,
-                  "links": [],
-                  "liveNow": false,
-                  "panels": [
-                    {
-                      "datasource": {
-                        "type": "prometheus",
-                        "uid": "prometheus"
-                      },
-                      "fieldConfig": {
-                        "defaults": {
-                          "color": {
-                            "mode": "palette-classic"
-                          },
-                          "custom": {
-                            "axisCenteredZero": false,
-                            "axisColorMode": "text",
-                            "axisLabel": "URLs/second",
-                            "axisPlacement": "auto",
-                            "barAlignment": 0,
-                            "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "none",
-                            "hideFrom": {
-                              "legend": false,
-                              "tooltip": false,
-                              "viz": false
-                            },
-                            "lineInterpolation": "smooth",
-                            "lineWidth": 2,
-                            "pointSize": 5,
-                            "scaleDistribution": {
-                              "type": "linear"
-                            },
-                            "showPoints": "never",
-                            "spanNulls": true
-                          }
-                        }
-                      },
-                      "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 0,
-                        "y": 0
-                      },
-                      "title": "URL Creation Rate",
-                      "type": "timeseries",
-                      "targets": [
-                        {
-                          "expr": "rate(shorturl_create_total[5m])",
-                          "refId": "A",
-                          "legendFormat": "Creates/sec"
-                        }
-                      ]
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: "48.1.1"
+    chart: kube-prometheus-stack
+    helm:
+      values: |
+        prometheusOperator:
+          createCustomResource: true
+          admissionWebhooks:
+            enabled: false
+            patch:
+              enabled: false
+          tls:
+            enabled: false
+        crds:
+          enabled: true
+          create: true
+        fullnameOverride: prometheus
+        
+        grafana:
+          enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            hosts:
+              - grafana.ddns.net
+            tls:
+              - secretName: grafana-tls
+                hosts:
+                  - grafana.ddns.net
+          sidecar:
+            dashboards:
+              enabled: true
+              searchNamespace: ALL
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: true
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              deleteAll: true
+              datasources:
+                - name: Prometheus
+                  type: prometheus
+                  url: http://prometheus-prometheus:9090
+                  access: proxy
+                  isDefault: true
+                  jsonData:
+                    timeInterval: "5s"
+                    queryTimeout: "30s"
+                    scrapeInterval: 5s
+          dashboards:
+            default:
+              url-shortener:
+                json: |
+                  {
+                    "annotations": {
+                      "list": []
                     },
-                    {
-                      "datasource": {
-                        "type": "prometheus",
-                        "uid": "prometheus"
-                      },
-                      "fieldConfig": {
-                        "defaults": {
-                          "color": {
-                            "mode": "palette-classic"
-                          },
-                          "custom": {
-                            "axisCenteredZero": false,
-                            "axisColorMode": "text",
-                            "axisLabel": "Retrievals/second",
-                            "axisPlacement": "auto",
-                            "barAlignment": 0,
-                            "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "none",
-                            "hideFrom": {
-                              "legend": false,
-                              "tooltip": false,
-                              "viz": false
+                    "editable": true,
+                    "fiscalYearStartMonth": 0,
+                    "graphTooltip": 0,
+                    "links": [],
+                    "liveNow": false,
+                    "panels": [
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
                             },
-                            "lineInterpolation": "smooth",
-                            "lineWidth": 2,
-                            "pointSize": 5,
-                            "scaleDistribution": {
-                              "type": "linear"
-                            },
-                            "showPoints": "never",
-                            "spanNulls": true
-                          }
-                        }
-                      },
-                      "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 12,
-                        "y": 0
-                      },
-                      "title": "URL Retrieval Rate",
-                      "type": "timeseries",
-                      "targets": [
-                        {
-                          "expr": "rate(shorturl_get_total[5m])",
-                          "refId": "A",
-                          "legendFormat": "Gets/sec"
-                        }
-                      ]
-                    },
-                    {
-                      "datasource": {
-                        "type": "prometheus",
-                        "uid": "prometheus"
-                      },
-                      "fieldConfig": {
-                        "defaults": {
-                          "color": {
-                            "mode": "thresholds"
-                          },
-                          "mappings": [],
-                          "thresholds": {
-                            "mode": "absolute",
-                            "steps": [
-                              {
-                                "color": "green",
-                                "value": null
+                            "custom": {
+                              "axisCenteredZero": false,
+                              "axisColorMode": "text",
+                              "axisLabel": "URLs/second",
+                              "axisPlacement": "auto",
+                              "barAlignment": 0,
+                              "drawStyle": "line",
+                              "fillOpacity": 20,
+                              "gradientMode": "none",
+                              "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
                               },
-                              {
-                                "color": "red",
-                                "value": 80
-                              }
-                            ]
-                          }
-                        }
-                      },
-                      "gridPos": {
-                        "h": 8,
-                        "w": 6,
-                        "x": 0,
-                        "y": 8
-                      },
-                      "title": "Total URLs Created",
-                      "type": "stat",
-                      "targets": [
-                        {
-                          "expr": "shorturl_create_total",
-                          "refId": "A"
-                        }
-                      ]
-                    },
-                    {
-                      "datasource": {
-                        "type": "prometheus",
-                        "uid": "prometheus"
-                      },
-                      "fieldConfig": {
-                        "defaults": {
-                          "color": {
-                            "mode": "thresholds"
-                          },
-                          "mappings": [],
-                          "thresholds": {
-                            "mode": "absolute",
-                            "steps": [
-                              {
-                                "color": "green",
-                                "value": null
+                              "lineInterpolation": "smooth",
+                              "lineWidth": 2,
+                              "pointSize": 5,
+                              "scaleDistribution": {
+                                "type": "linear"
                               },
-                              {
-                                "color": "red",
-                                "value": 80
-                              }
-                            ]
+                              "showPoints": "never",
+                              "spanNulls": true
+                            }
                           }
-                        }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 0,
+                          "y": 0
+                        },
+                        "title": "URL Creation Rate",
+                        "type": "timeseries",
+                        "targets": [
+                          {
+                            "expr": "rate(shorturl_create_total[5m])",
+                            "refId": "A",
+                            "legendFormat": "Creates/sec"
+                          }
+                        ]
                       },
-                      "gridPos": {
-                        "h": 8,
-                        "w": 6,
-                        "x": 6,
-                        "y": 8
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "palette-classic"
+                            },
+                            "custom": {
+                              "axisCenteredZero": false,
+                              "axisColorMode": "text",
+                              "axisLabel": "Retrievals/second",
+                              "axisPlacement": "auto",
+                              "barAlignment": 0,
+                              "drawStyle": "line",
+                              "fillOpacity": 20,
+                              "gradientMode": "none",
+                              "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
+                              },
+                              "lineInterpolation": "smooth",
+                              "lineWidth": 2,
+                              "pointSize": 5,
+                              "scaleDistribution": {
+                                "type": "linear"
+                              },
+                              "showPoints": "never",
+                              "spanNulls": true
+                            }
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 12,
+                          "y": 0
+                        },
+                        "title": "URL Retrieval Rate",
+                        "type": "timeseries",
+                        "targets": [
+                          {
+                            "expr": "rate(shorturl_get_total[5m])",
+                            "refId": "A",
+                            "legendFormat": "Gets/sec"
+                          }
+                        ]
                       },
-                      "title": "Total URL Retrievals",
-                      "type": "stat",
-                      "targets": [
-                        {
-                          "expr": "shorturl_get_total",
-                          "refId": "A"
-                        }
-                      ]
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                },
+                                {
+                                  "color": "red",
+                                  "value": 80
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 6,
+                          "x": 0,
+                          "y": 8
+                        },
+                        "title": "Total URLs Created",
+                        "type": "stat",
+                        "targets": [
+                          {
+                            "expr": "shorturl_create_total",
+                            "refId": "A"
+                          }
+                        ]
+                      },
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                },
+                                {
+                                  "color": "red",
+                                  "value": 80
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 6,
+                          "x": 6,
+                          "y": 8
+                        },
+                        "title": "Total URL Retrievals",
+                        "type": "stat",
+                        "targets": [
+                          {
+                            "expr": "shorturl_get_total",
+                            "refId": "A"
+                          }
+                        ]
+                      },
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "fieldConfig": {
+                          "defaults": {
+                            "color": {
+                              "mode": "continuous-BlYlRd"
+                            },
+                            "mappings": [],
+                            "min": 0,
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                {
+                                  "color": "green",
+                                  "value": null
+                                }
+                              ]
+                            },
+                            "unit": "percentunit"
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 12,
+                          "y": 8
+                        },
+                        "title": "Success Rate",
+                        "type": "gauge",
+                        "targets": [
+                          {
+                            "expr": "sum(shorturl_create_total{status=\"success\"}) / sum(shorturl_create_total)",
+                            "refId": "A"
+                          }
+                        ]
+                      }
+                    ],
+                    "refresh": "5s",
+                    "schemaVersion": 38,
+                    "style": "dark",
+                    "tags": ["url-shortener"],
+                    "templating": {
+                      "list": []
                     },
-                    {
-                      "datasource": {
-                        "type": "prometheus",
-                        "uid": "prometheus"
-                      },
-                      "fieldConfig": {
-                        "defaults": {
-                          "color": {
-                            "mode": "continuous-BlYlRd"
-                          },
-                          "mappings": [],
-                          "min": 0,
-                          "thresholds": {
-                            "mode": "absolute",
-                            "steps": [
-                              {
-                                "color": "green",
-                                "value": null
-                              }
-                            ]
-                          },
-                          "unit": "percentunit"
-                        }
-                      },
-                      "gridPos": {
-                        "h": 8,
-                        "w": 12,
-                        "x": 12,
-                        "y": 8
-                      },
-                      "title": "Success Rate",
-                      "type": "gauge",
-                      "targets": [
-                        {
-                          "expr": "sum(shorturl_create_total{status=\"success\"}) / sum(shorturl_create_total)",
-                          "refId": "A"
-                        }
-                      ]
-                    }
-                  ],
-                  "refresh": "5s",
-                  "schemaVersion": 38,
-                  "style": "dark",
-                  "tags": ["url-shortener"],
-                  "templating": {
-                    "list": []
-                  },
-                  "time": {
-                    "from": "now-1h",
-                    "to": "now"
-                  },
-                  "title": "URL Shortener Dashboard",
-                  "version": 1,
-                  "weekStart": ""
-                }
-       prometheus:
-         prometheusSpec:
-           scrapeInterval: "5s" 
-           evaluationInterval: "5s"
-           retention: 7d
-           resources:
-             requests:
-               cpu: 300m
-               memory: 500Mi
-             limits:
-               cpu: 600m
-               memory: 1Gi
-           serviceMonitorSelector:
-             matchLabels:
-               app.kubernetes.io/instance: kube-prometheus-stack
-           additionalScrapeConfigs: []
-           
-       alertmanager:
-         enabled: true
-         
-       nodeExporter:
-         enabled: true
-         
-       kubeStateMetrics:
-         enabled: true
-         
- destination:
-   server: https://kubernetes.default.svc
-   namespace: monitoring
- syncPolicy:
-   automated:
-     prune: true
-     selfHeal: true
-   syncOptions:
-     - CreateNamespace=true
-     - ServerSideApply=true
+                    "time": {
+                      "from": "now-1h",
+                      "to": "now"
+                    },
+                    "title": "URL Shortener Dashboard",
+                    "version": 1,
+                    "weekStart": ""
+                  }
+
+        prometheus:
+          prometheusSpec:
+            scrapeInterval: "5s" 
+            evaluationInterval: "5s"
+            retention: 7d
+            resources:
+              requests:
+                cpu: 300m
+                memory: 500Mi
+              limits:
+                cpu: 600m
+                memory: 1Gi
+            serviceMonitorSelector:
+              matchLabels:
+                app.kubernetes.io/instance: kube-prometheus-stack
+            additionalScrapeConfigs: []
+            
+        alertmanager:
+          enabled: true
+          
+        nodeExporter:
+          enabled: true
+          
+        kubeStateMetrics:
+          enabled: true
+          
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

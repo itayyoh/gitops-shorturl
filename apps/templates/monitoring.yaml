@@ -27,7 +27,7 @@ spec:
             tls:
               - secretName: grafana-tls
                 hosts:
-                  - grafana.yourdomain.com
+                  - grafana.ddns.net
           datasources:
             datasources.yaml:
               apiVersion: 1

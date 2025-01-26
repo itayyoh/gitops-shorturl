@@ -133,7 +133,7 @@ spec:
                        "targets": [
                          {
                            "expr": "sum by (status) (flask_http_request_total)",
-                           "legendFormat": "HTTP {{status}}"
+                           "legendFormat": "Status Code __auto"
                          },
                          {
                            "expr": "rate(shorturl_get_total[5m])",

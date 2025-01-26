@@ -1,362 +1,237 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
- name: kube-prometheus-stack
- namespace: argocd
- annotations:
-   argocd.argoproj.io/sync-wave: "1"
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
- project: default
- source:
-   repoURL: https://prometheus-community.github.io/helm-charts
-   targetRevision: "48.1.1"
-   chart: kube-prometheus-stack
-   helm:
-     values: |
-       prometheusOperator:
-         createCustomResource: true
-         admissionWebhooks:
-           enabled: false
-           patch:
-             enabled: false
-         tls:
-           enabled: false
-       crds:
-         enabled: true
-         create: true
-       fullnameOverride: prometheus
-       
-       grafana:
-         enabled: true
-         ingress:
-           enabled: true
-           ingressClassName: nginx
-           annotations:
-             cert-manager.io/cluster-issuer: letsencrypt-prod
-             nginx.ingress.kubernetes.io/ssl-redirect: "true"
-           hosts:
-             - grafana.ddns.net
-           tls:
-             - secretName: grafana-tls
-               hosts:
-                 - grafana.ddns.net
-         sidecar:
-           dashboards:
-             enabled: true
-             searchNamespace: ALL
-           datasources:
-             enabled: true
-             defaultDatasourceEnabled: true
-         dashboardProviders:
-           dashboardproviders.yaml:
-             apiVersion: 1
-             providers:
-             - name: 'default'
-               orgId: 1
-               folder: ''
-               type: file
-               disableDeletion: false
-               editable: true
-               options:
-                 path: /var/lib/grafana/dashboards
-         datasources:
-           datasources.yaml:
-             apiVersion: 1
-             deleteAll: true
-             datasources:
-               - name: Prometheus
-                 type: prometheus
-                 url: http://prometheus-prometheus:9090
-                 access: proxy
-                 isDefault: true
-                 jsonData:
-                   timeInterval: "5s"
-                   queryTimeout: "30s"
-                   scrapeInterval: 5s
-         dashboards:
-           default:
-             url-shortener:
-               json: |
-                 {
-                   "annotations": {
-                     "list": []
-                   },
-                   "editable": true,
-                   "fiscalYearStartMonth": 0,
-                   "graphTooltip": 0,
-                   "links": [],
-                   "liveNow": false,
-                   "panels": [
-                     {
-                       "datasource": {
-                         "type": "prometheus",
-                         "uid": "prometheus"
-                       },
-                       "fieldConfig": {
-                         "defaults": {
-                           "color": {
-                             "mode": "palette-classic"
-                           },
-                           "custom": {
-                             "axisCenteredZero": false,
-                             "axisColorMode": "text",
-                             "axisLabel": "Operations/sec",
-                             "axisPlacement": "auto",
-                             "barAlignment": 0,
-                             "drawStyle": "line",
-                             "fillOpacity": 20,
-                             "gradientMode": "none",
-                             "hideFrom": {
-                               "legend": false,
-                               "tooltip": false,
-                               "viz": false
-                             },
-                             "lineInterpolation": "smooth",
-                             "lineWidth": 2,
-                             "pointSize": 5,
-                             "scaleDistribution": {
-                               "type": "linear"
-                             },
-                             "showPoints": "never",
-                             "spanNulls": true
-                           }
-                         }
-                       },
-                       "gridPos": {
-                         "h": 8,
-                         "w": 12,
-                         "x": 0,
-                         "y": 0
-                       },
-                       "title": "URL Operations Rate",
-                       "type": "timeseries",
-                       "targets": [
-                         {
-                           "expr": "sum by (status) (flask_http_request_total)",
-                           "legendFormat": "Status Code __auto"
-                         },
-                         {
-                           "expr": "rate(shorturl_get_total[5m])",
-                           "legendFormat": "Gets/sec"
-                         }
-                       ]
-                     },
-                     {
-                       "datasource": {
-                         "type": "prometheus",
-                         "uid": "prometheus"
-                       },
-                       "fieldConfig": {
-                         "defaults": {
-                           "mappings": [],
-                           "thresholds": {
-                             "mode": "absolute",
-                             "steps": [
-                               {
-                                 "color": "green",
-                                 "value": null
-                               }
-                             ]
-                           },
-                           "unitScale": true
-                         }
-                       },
-                       "gridPos": {
-                         "h": 8,
-                         "w": 6,
-                         "x": 12,
-                         "y": 0
-                       },
-                       "title": "Current URLs in System",
-                       "type": "stat",
-                       "targets": [
-                         {
-                           "expr": "shorturl_current_urls",
-                           "legendFormat": "Total URLs"
-                         }
-                       ]
-                     },
-                     {
-                       "datasource": {
-                         "type": "prometheus",
-                         "uid": "prometheus"
-                       },
-                       "fieldConfig": {
-                         "defaults": {
-                           "custom": {
-                             "hideFrom": {
-                               "legend": false,
-                               "tooltip": false,
-                               "viz": false
-                             }
-                           }
-                         }
-                       },
-                       "gridPos": {
-                         "h": 8,
-                         "w": 6,
-                         "x": 18,
-                         "y": 0
-                       },
-                       "title": "HTTP Status Codes",
-                       "type": "piechart",
-                       "targets": [
-                         {
-                           "expr": "sum by (status) (flask_http_request_total)",
-                           "legendFormat": "{{status}}"
-                         }
-                       ]
-                     },
-                     {
-                       "datasource": {
-                         "type": "prometheus",
-                         "uid": "prometheus"
-                       },
-                       "fieldConfig": {
-                         "defaults": {
-                           "color": {
-                             "mode": "palette-classic"
-                           },
-                           "custom": {
-                             "axisCenteredZero": false,
-                             "axisColorMode": "text",
-                             "axisLabel": "Duration (seconds)",
-                             "axisPlacement": "auto",
-                             "barAlignment": 0,
-                             "drawStyle": "line",
-                             "fillOpacity": 20,
-                             "gradientMode": "none",
-                             "hideFrom": {
-                               "legend": false,
-                               "tooltip": false,
-                               "viz": false
-                             },
-                             "lineInterpolation": "smooth",
-                             "lineWidth": 2,
-                             "pointSize": 5,
-                             "scaleDistribution": {
-                               "type": "linear"
-                             },
-                             "showPoints": "never",
-                             "spanNulls": true
-                           }
-                         }
-                       },
-                       "gridPos": {
-                         "h": 8,
-                         "w": 12,
-                         "x": 0,
-                         "y": 8
-                       },
-                       "title": "Request Duration",
-                       "type": "timeseries",
-                       "targets": [
-                         {
-                           "expr": "rate(flask_http_request_duration_seconds_sum[5m]) / rate(flask_http_request_duration_seconds_count[5m])",
-                           "legendFormat": "Average"
-                         }
-                       ]
-                     },
-                     {
-                       "datasource": {
-                         "type": "prometheus",
-                         "uid": "prometheus"
-                       },
-                       "fieldConfig": {
-                         "defaults": {
-                           "color": {
-                             "mode": "palette-classic"
-                           },
-                           "custom": {
-                             "axisCenteredZero": false,
-                             "axisColorMode": "text",
-                             "axisLabel": "Memory (bytes)",
-                             "axisPlacement": "auto",
-                             "barAlignment": 0,
-                             "drawStyle": "line",
-                             "fillOpacity": 20,
-                             "gradientMode": "none",
-                             "hideFrom": {
-                               "legend": false,
-                               "tooltip": false,
-                               "viz": false
-                             },
-                             "lineInterpolation": "smooth",
-                             "lineWidth": 2,
-                             "pointSize": 5,
-                             "scaleDistribution": {
-                               "type": "linear"
-                             },
-                             "showPoints": "never",
-                             "spanNulls": true
-                           }
-                         }
-                       },
-                       "gridPos": {
-                         "h": 8,
-                         "w": 12,
-                         "x": 12,
-                         "y": 8
-                       },
-                       "title": "Memory Usage",
-                       "type": "timeseries",
-                       "targets": [
-                         {
-                           "expr": "process_resident_memory_bytes",
-                           "legendFormat": "Memory"
-                         }
-                       ]
-                     }
-                   ],
-                   "refresh": "5s",
-                   "schemaVersion": 38,
-                   "style": "dark",
-                   "tags": ["url-shortener"],
-                   "templating": {
-                     "list": []
-                   },
-                   "time": {
-                     "from": "now-1h",
-                     "to": "now"
-                   },
-                   "title": "URL Shortener Dashboard",
-                   "version": 1,
-                   "weekStart": ""
-                 }
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: "48.1.1"
+    chart: kube-prometheus-stack
+    helm:
+      values: |
+        prometheusOperator:
+          createCustomResource: true
+          admissionWebhooks:
+            enabled: false
+            patch:
+              enabled: false
+          tls:
+            enabled: false
+        crds:
+          enabled: true
+          create: true
+        fullnameOverride: prometheus
+        
+        grafana:
+          enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            hosts:
+              - grafana.ddns.net
+            tls:
+              - secretName: grafana-tls
+                hosts:
+                  - grafana.ddns.net
+          sidecar:
+            dashboards:
+              enabled: true
+              searchNamespace: ALL
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: true
+          dashboardProviders:
+            dashboardproviders.yaml:
+              apiVersion: 1
+              providers:
+              - name: 'default'
+                orgId: 1
+                folder: ''
+                type: file
+                disableDeletion: false
+                editable: true
+                options:
+                  path: /var/lib/grafana/dashboards
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              deleteAll: true
+              datasources:
+                - name: Prometheus
+                  type: prometheus
+                  url: http://prometheus-prometheus:9090
+                  access: proxy
+                  isDefault: true
+                  jsonData:
+                    timeInterval: "5s"
+                    queryTimeout: "30s"
+                    scrapeInterval: 5s
+          dashboards:
+            default:
+              url-shortener:
+                json: |
+                  {
+                    "annotations": {
+                      "list": []
+                    },
+                    "editable": true,
+                    "fiscalYearStartMonth": 0,
+                    "graphTooltip": 0,
+                    "id": null,
+                    "links": [],
+                    "liveNow": false,
+                    "panels": [
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "title": "Requests Per Second",
+                        "type": "timeseries",
+                        "fieldConfig": {
+                          "defaults": {
+                            "custom": {
+                              "drawStyle": "line",
+                              "lineInterpolation": "linear",
+                              "fillOpacity": 10
+                            },
+                            "unit": "short"
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 0,
+                          "y": 0
+                        },
+                        "targets": [
+                          {
+                            "expr": "rate(flask_http_request_total[5m])",
+                            "legendFormat": "Requests"
+                          }
+                        ]
+                      },
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "title": "Memory Usage",
+                        "type": "gauge",
+                        "fieldConfig": {
+                          "defaults": {
+                            "max": 1073741824,
+                            "min": 0,
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                { "color": "green", "value": null },
+                                { "color": "yellow", "value": 536870912 },
+                                { "color": "red", "value": 858993459 }
+                              ]
+                            },
+                            "unit": "bytes"
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 12,
+                          "x": 12,
+                          "y": 0
+                        },
+                        "targets": [
+                          {
+                            "expr": "process_resident_memory_bytes",
+                            "legendFormat": "Memory"
+                          }
+                        ]
+                      },
+                      {
+                        "datasource": {
+                          "type": "prometheus",
+                          "uid": "prometheus"
+                        },
+                        "title": "URL Operations",
+                        "type": "stat",
+                        "fieldConfig": {
+                          "defaults": {
+                            "mappings": [],
+                            "thresholds": {
+                              "mode": "absolute",
+                              "steps": [
+                                { "color": "green", "value": null }
+                              ]
+                            }
+                          }
+                        },
+                        "gridPos": {
+                          "h": 8,
+                          "w": 8,
+                          "x": 0,
+                          "y": 8
+                        },
+                        "targets": [
+                          {
+                            "expr": "shorturl_current_urls",
+                            "legendFormat": "Total URLs"
+                          }
+                        ]
+                      }
+                    ],
+                    "refresh": "5s",
+                    "schemaVersion": 38,
+                    "style": "dark",
+                    "tags": [],
+                    "templating": {
+                      "list": []
+                    },
+                    "time": {
+                      "from": "now-1h",
+                      "to": "now"
+                    },
+                    "title": "URL Shortener",
+                    "version": 1
+                  }
 
-       prometheus:
-         prometheusSpec:
-           scrapeInterval: "5s" 
-           evaluationInterval: "5s"
-           retention: 7d
-           resources:
-             requests:
-               cpu: 300m
-               memory: 500Mi
-             limits:
-               cpu: 600m
-               memory: 1Gi
-           serviceMonitorSelector:
-             matchLabels:
-               app.kubernetes.io/instance: kube-prometheus-stack
-           additionalScrapeConfigs: []
-           
-       alertmanager:
-         enabled: true
-         
-       nodeExporter:
-         enabled: true
-         
-       kubeStateMetrics:
-         enabled: true
-         
- destination:
-   server: https://kubernetes.default.svc
-   namespace: monitoring
- syncPolicy:
-   automated:
-     prune: true
-     selfHeal: true
-   syncOptions:
-     - CreateNamespace=true
-     - ServerSideApply=true
+        prometheus:
+          prometheusSpec:
+            scrapeInterval: "5s"
+            evaluationInterval: "5s"
+            retention: 7d
+            resources:
+              requests:
+                cpu: 300m
+                memory: 500Mi
+              limits:
+                cpu: 600m
+                memory: 1Gi
+            serviceMonitorSelector:
+              matchLabels:
+                app.kubernetes.io/instance: kube-prometheus-stack
+
+        alertmanager:
+          enabled: true
+        
+        nodeExporter:
+          enabled: true
+        
+        kubeStateMetrics:
+          enabled: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

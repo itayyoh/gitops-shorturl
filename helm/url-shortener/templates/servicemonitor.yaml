@@ -3,18 +3,18 @@ kind: ServiceMonitor
 metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
-    {{- if .Values.serviceMonitor.labels }}
-    {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
-    {{- end }}
-    app: url-shortener
+    {{- include "url-shortener.labels" . | nindent 4 }}
+    app.kubernetes.io/instance: kube-prometheus-stack
 spec:
   endpoints:
     - interval: {{ .Values.serviceMonitor.interval }}
       path: /metrics
       port: http
+      scrapeTimeout: 10s
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      app: url-shortener
+      app.kubernetes.io/name: url-shortener
+      app.kubernetes.io/instance: {{ .Release.Name }}

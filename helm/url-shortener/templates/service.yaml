@@ -4,6 +4,8 @@ metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
     {{- include "url-shortener.labels" . | nindent 4 }}
+    app.kubernetes.io/name: url-shortener
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +14,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "url-shortener.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: url-shortener
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -4,6 +4,6 @@ dependencies:
   version: 13.6.0
 - name: url-shortener
   repository: file://../url-shortener
-  version: 1.0.18
-digest: sha256:d08d39b14825fc46f03279f678449adc7296ce161a5ac57448ceee18b4d05928
-generated: "2025-01-26T14:38:07.901444671+02:00"
+  version: 1.0.19
+digest: sha256:5807958a5d7077041f70465d5e2d0f002071d3f9ca004f68169fd4cc6d2d6e8b
+generated: "2025-01-26T16:15:32.227420134+02:00"

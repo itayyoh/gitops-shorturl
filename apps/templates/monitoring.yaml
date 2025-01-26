@@ -14,25 +14,37 @@ spec:
     helm:
       values: |
         fullnameOverride: prometheus
-        admissionWebhooks:
-          enabled: false
-          patch:
-            enabled: false
-        prometheusOperator:
-          admissionWebhooks:
-            enabled: false
-            patch:
-              enabled: false
-          tls:
-            enabled: false
         grafana:
           enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            hosts:
+              - grafana.yourdomain.com
+            tls:
+              - secretName: grafana-tls
+                hosts:
+                  - grafana.yourdomain.com
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+                - name: Prometheus
+                  type: prometheus
+                  url: http://prometheus-server.monitoring:9090
+                  access: proxy
+                  isDefault: true
+                  jsonData:
+                    timeInterval: "5s"
+                    queryTimeout: "30s"
         prometheus:
           prometheusSpec:
-            serviceMonitorSelectorNilUsesHelmValues: false
-            serviceMonitorSelector:
-              matchLabels:
-                app.kubernetes.io/instance: kube-prometheus-stack
+            scrapeInterval: "5s"
+            evaluationInterval: "5s"
+            retention: 7d
             resources:
               requests:
                 cpu: 300m
@@ -40,31 +52,10 @@ spec:
               limits:
                 cpu: 600m
                 memory: 1Gi
-        crds:
-          enabled: true
         alertmanager:
           enabled: true
         nodeExporter:
           enabled: true
-          hostNetwork: true
-          nameOverride: "kube-prometheus-stack-node-exporter"
-          fullnameOverride: "kube-prometheus-stack-node-exporter" 
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-            limits:
-              cpu: 200m
-              memory: 200Mi
-          tolerations:
-            - operator: "Exists"
-          service:
-            port: 9101  # Changed from 9100
-            targetPort: 9101  # Changed from 9100
-          ports:
-            - name: metrics
-              containerPort: 9101  # Changed from 9100
-              hostPort: 9101  # Changed from 9100
         kubeStateMetrics:
           enabled: true
   destination:
@@ -76,6 +67,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - Replace=true
-      - PruneLast=true

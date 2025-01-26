@@ -14,6 +14,12 @@ spec:
     helm:
       values: |
         installCRDs: true
+        extraArgs:
+          - --dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53
+        prometheus:
+          enabled: true
+          servicemonitor:
+            enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

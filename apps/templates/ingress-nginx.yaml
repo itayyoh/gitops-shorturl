@@ -6,7 +6,18 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: shorturl-app.ddns.net
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: shorturl-tls
+      hosts:
+        - shorturl-app.ddns.net
+
 spec:
   project: default
   source:
@@ -19,8 +30,8 @@ spec:
           service:
             type: LoadBalancer
           config:
-            ssl-redirect: false
-            force-ssl-redirect: false
+            ssl-redirect: true
+            force-ssl-redirect: true
             use-forwarded-headers: true
           extraArgs:
             enable-ssl-passthrough: true

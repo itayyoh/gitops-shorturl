@@ -13,6 +13,14 @@ spec:
     chart: kube-prometheus-stack
     helm:
       values: |
+        prometheusOperator:
+          createCustomResource: true
+          admissionWebhooks:
+            enabled: false
+            patch:
+              enabled: false
+        crds:
+          enabled: true
         fullnameOverride: prometheus
         grafana:
           enabled: true
@@ -28,13 +36,18 @@ spec:
               - secretName: grafana-tls
                 hosts:
                   - grafana.ddns.net
+          sidecar:
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: true
           datasources:
             datasources.yaml:
               apiVersion: 1
+              deleteAll: true
               datasources:
                 - name: Prometheus
                   type: prometheus
-                  url: http://prometheus-server.monitoring:9090
+                  url: http://prometheus-prometheus-server
                   access: proxy
                   isDefault: true
                   jsonData:
@@ -52,6 +65,7 @@ spec:
               limits:
                 cpu: 600m
                 memory: 1Gi
+            serviceMonitorSelectorNilUsesHelmValues: false
         alertmanager:
           enabled: true
         nodeExporter:
@@ -67,3 +81,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

@@ -163,7 +163,7 @@ spec:
                memory: 1Gi
            serviceMonitorSelector:
              matchLabels:
-               app: url-shortener
+               app.kubernetes.io/instance: kube-prometheus-stack
            additionalScrapeConfigs: []
            
        alertmanager:

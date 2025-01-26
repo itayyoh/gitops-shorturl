@@ -4,8 +4,10 @@ metadata:
   name: {{ .Release.Name }}-url-shortener
   labels:
     {{- include "url-shortener.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   ingressClassName: nginx
   tls:

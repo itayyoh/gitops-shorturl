@@ -133,7 +133,7 @@ spec:
                        "targets": [
                          {
                            "expr": "rate(shorturl_create_total[5m])",
-                           "legendFormat": "Creates/sec"
+                           "legendFormat": "HTTP {{status}}"
                          },
                          {
                            "expr": "rate(shorturl_get_total[5m])",

@@ -47,22 +47,9 @@ spec:
             datasources:
               enabled: true
               defaultDatasourceEnabled: true
-          dashboardProviders:
-            dashboardproviders.yaml:
-              apiVersion: 1
-              providers:
-              - name: 'default'
-                orgId: 1
-                folder: ''
-                type: file
-                disableDeletion: false
-                editable: true
-                options:
-                  path: /var/lib/grafana/dashboards
           datasources:
             datasources.yaml:
               apiVersion: 1
-              deleteAll: true
               datasources:
                 - name: Prometheus
                   type: prometheus
@@ -73,132 +60,6 @@ spec:
                     timeInterval: "5s"
                     queryTimeout: "30s"
                     scrapeInterval: 5s
-          dashboards:
-            default:
-              url-shortener:
-                json: |
-                  {
-                    "annotations": {
-                      "list": []
-                    },
-                    "editable": true,
-                    "fiscalYearStartMonth": 0,
-                    "graphTooltip": 0,
-                    "id": null,
-                    "links": [],
-                    "liveNow": false,
-                    "panels": [
-                      {
-                        "datasource": {
-                          "type": "prometheus",
-                          "uid": "prometheus"
-                        },
-                        "title": "Requests Per Second",
-                        "type": "timeseries",
-                        "fieldConfig": {
-                          "defaults": {
-                            "custom": {
-                              "drawStyle": "line",
-                              "lineInterpolation": "linear",
-                              "fillOpacity": 10
-                            },
-                            "unit": "short"
-                          }
-                        },
-                        "gridPos": {
-                          "h": 8,
-                          "w": 12,
-                          "x": 0,
-                          "y": 0
-                        },
-                        "targets": [
-                          {
-                            "expr": "rate(flask_http_request_total[5m])",
-                            "legendFormat": "Requests"
-                          }
-                        ]
-                      },
-                      {
-                        "datasource": {
-                          "type": "prometheus",
-                          "uid": "prometheus"
-                        },
-                        "title": "Memory Usage",
-                        "type": "gauge",
-                        "fieldConfig": {
-                          "defaults": {
-                            "max": 1073741824,
-                            "min": 0,
-                            "thresholds": {
-                              "mode": "absolute",
-                              "steps": [
-                                { "color": "green", "value": null },
-                                { "color": "yellow", "value": 536870912 },
-                                { "color": "red", "value": 858993459 }
-                              ]
-                            },
-                            "unit": "bytes"
-                          }
-                        },
-                        "gridPos": {
-                          "h": 8,
-                          "w": 12,
-                          "x": 12,
-                          "y": 0
-                        },
-                        "targets": [
-                          {
-                            "expr": "process_resident_memory_bytes",
-                            "legendFormat": "Memory"
-                          }
-                        ]
-                      },
-                      {
-                        "datasource": {
-                          "type": "prometheus",
-                          "uid": "prometheus"
-                        },
-                        "title": "URL Operations",
-                        "type": "stat",
-                        "fieldConfig": {
-                          "defaults": {
-                            "mappings": [],
-                            "thresholds": {
-                              "mode": "absolute",
-                              "steps": [
-                                { "color": "green", "value": null }
-                              ]
-                            }
-                          }
-                        },
-                        "gridPos": {
-                          "h": 8,
-                          "w": 8,
-                          "x": 0,
-                          "y": 8
-                        },
-                        "targets": [
-                          {
-                            "expr": "shorturl_current_urls",
-                            "legendFormat": "Total URLs"
-                          }
-                        ]
-                      }
-                    ],
-                    "refresh": "5s",
-                    "schemaVersion": 38,
-                    "style": "dark",
-                    "tags": [],
-                    "templating": {
-                      "list": []
-                    },
-                    "time": {
-                      "from": "now-1h",
-                      "to": "now"
-                    },
-                    "title": "URL Shortener",
-                    "version": 1
-                  }
 
         prometheus:
           prometheusSpec:
